@@ -21,15 +21,27 @@ export function AppRouting() {
 
   useEffect(() => {
     if (firstLoad) {
+      // Skip verification on callback page - let the callback page handle it
+      if (path === '/auth/callback') {
+        setLoading(false);
+        setFirstLoad(false);
+        return;
+      }
+
       verify().finally(() => {
         setLoading(false);
         setFirstLoad(false);
       });
     }
-  });
+  }, [firstLoad, verify, setLoading, path]); // Added path dependency
 
   useEffect(() => {
     if (!firstLoad) {
+      // Skip verification on callback page - let the callback page handle it
+      if (path === '/auth/callback') {
+        return;
+      }
+
       start('static');
       verify()
         .catch(() => {

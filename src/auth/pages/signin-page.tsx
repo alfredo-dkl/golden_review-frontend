@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/auth/context/auth-context';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { AlertCircle, LoaderCircleIcon } from 'lucide-react';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Icons } from '@/components/common/icons';
-import { ALLOWED_EMAIL_DOMAIN } from '@/auth/adapters/msalConfig';
+import { ALLOWED_EMAIL_DOMAIN } from '@/auth/lib/msal-config';
 
 export function SignInPage() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login } = useAuth();
 
@@ -52,22 +51,17 @@ export function SignInPage() {
     try {
       setIsLoading(true);
       setError(null);
-
-      console.log('🔹 Initiating Microsoft login with email:', email);
+      // login() will redirect to Microsoft - code after this won't execute
       await login(email);
-
-      // Navigate to next or home
-      const nextPath = searchParams.get('next') || '/';
-      navigate(nextPath);
+      // Note: The following code never runs because login() redirects the page
     } catch (err) {
       console.error('Microsoft sign-in error:', err);
+      setIsLoading(false);
       setError(
         err instanceof Error
           ? err.message
           : 'Failed to sign in with Microsoft. Please try again.',
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 

@@ -33,7 +33,6 @@ export class SessionManager {
                 const now = new Date();
 
                 if (now >= expiryDate) {
-                    console.log('Session expired, clearing...');
                     this.clearSession();
                     return null;
                 }

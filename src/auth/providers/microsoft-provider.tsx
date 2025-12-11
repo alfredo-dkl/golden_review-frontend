@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect, useState } from 'react';
+import { PropsWithChildren, useEffect, useState, useRef } from 'react';
 import { MicrosoftAuthAdapter } from '@/auth/adapters/microsoft-adapter';
 import { AuthContext } from '@/auth/context/auth-context';
 import { AuthModel, UserModel } from '@/auth/lib/models';
@@ -8,18 +8,32 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const [auth, setAuth] = useState<AuthModel | undefined>();
     const [currentUser, setCurrentUser] = useState<UserModel | undefined>();
     const [isAdmin, setIsAdmin] = useState(false);
+    const hasInitialized = useRef(false);
 
     // Check if user is admin
     useEffect(() => {
         setIsAdmin(currentUser?.is_admin === true);
     }, [currentUser]);
 
-    // Initialize session (on page reload)
+    // Initialize session (on page reload) - only once
     useEffect(() => {
+        // Prevent double initialization in React Strict Mode
+        if (hasInitialized.current) {
+            return;
+        }
+        hasInitialized.current = true;
+
         const init = async () => {
             try {
                 // Initialize Microsoft adapter
                 await MicrosoftAuthAdapter.initialize();
+
+                // Skip session check if we're on the callback page
+                // The callback page will handle authentication
+                if (window.location.pathname === '/auth/callback') {
+                    setLoading(false);
+                    return;
+                }
 
                 // Check if we have a valid session with the backend (via cookie)
                 const user = await MicrosoftAuthAdapter.getCurrentUser();
@@ -29,7 +43,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
                     setAuth({ access_token: 'session', refresh_token: '' });
                 }
             } catch (err) {
-                console.error('AuthProvider: Initialization error', err);
+                console.error('❌ AuthProvider: Initialization error', err);
                 // Clear any invalid session data
                 setAuth(undefined);
                 setCurrentUser(undefined);
@@ -60,19 +74,21 @@ export function AuthProvider({ children }: PropsWithChildren) {
     };
 
     // Handle authentication callback (called from callback page)
-    const handleCallback = async (code: string, state: string) => {
+    const handleCallback = async () => {
         try {
             setLoading(true);
-            const { user } = await MicrosoftAuthAdapter.handleCallback(code, state);
-
+            const { user } = await MicrosoftAuthAdapter.handleCallback();
             // Session is now in cookie - just update local state
             setAuth({ access_token: 'session', refresh_token: '' });
             setCurrentUser(user);
-
-            console.log('AuthProvider: Authentication successful');
             return { success: true, user };
         } catch (error) {
-            console.error('AuthProvider: Callback error', error);
+            console.error('❌ AuthProvider: Callback error occurred');
+            console.error('❌ AuthProvider: Error type:', typeof error);
+            console.error('❌ AuthProvider: Error:', error);
+            console.error('❌ AuthProvider: Error message:', (error as Error)?.message);
+            console.error('❌ AuthProvider: Error stack:', (error as Error)?.stack);
+
             setAuth(undefined);
             setCurrentUser(undefined);
             throw error;

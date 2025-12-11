@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 /**
  * Callback page for Microsoft OAuth authentication redirects.
  * This component handles the authentication flow after a user signs in with Microsoft.
- * It processes the backend authentication callback.
+ * It processes the MSAL redirect response.
  */
 export function CallbackPage() {
   const [searchParams] = useSearchParams();
@@ -14,9 +14,7 @@ export function CallbackPage() {
   const { handleCallback } = useAuth();
 
   useEffect(() => {
-    // Get callback parameters
-    const code = searchParams.get('code');
-    const state = searchParams.get('state');
+    // Check if there's an error in the URL params
     const errorParam = searchParams.get('error');
     const errorDescription = searchParams.get('error_description');
 
@@ -31,36 +29,31 @@ export function CallbackPage() {
       return;
     }
 
-    if (!code || !state) {
-      setError('Missing authentication parameters');
-      setTimeout(() => {
-        navigate('/auth/signin?error=invalid_callback');
-      }, 1500);
-      return;
-    }
-
-    // Handle the backend authentication callback
+    // Handle the MSAL redirect callback
     const processCallback = async () => {
       try {
-        console.log('Processing Microsoft OAuth callback with backend');
-
-        // Handle callback through the auth context
-        const result = await handleCallback(code, state);
+        // Handle callback through the auth context (no params needed for MSAL)
+        const result = await handleCallback();
 
         if (result.success) {
-          console.log('Microsoft authentication successful', result.user);
-
-          // Get the next URL - either from query param or default to root
+          // Get the next URL - either from query param or default to root/dashboard
           const nextPath = searchParams.get('next') || '/';
+          await new Promise(resolve => setTimeout(resolve, 100));
 
-          // Navigate to the target page
-          console.log('Redirecting to:', nextPath);
-          navigate(nextPath);
+          // Navigate to the target page with replace to avoid back button issues
+          navigate(nextPath, { replace: true });
         } else {
+          console.error('❌ CallbackPage: Result success is false');
+          console.error('❌ CallbackPage: Full result:', result);
           throw new Error('Authentication failed');
         }
       } catch (err) {
-        console.error('Error processing Microsoft OAuth callback:', err);
+        console.error('💥 CallbackPage: Error processing MSAL redirect');
+        console.error('💥 CallbackPage: Error type:', typeof err);
+        console.error('💥 CallbackPage: Error:', err);
+        console.error('💥 CallbackPage: Error message:', (err as Error)?.message);
+        console.error('💥 CallbackPage: Error stack:', (err as Error)?.stack);
+
         setError('An unexpected error occurred during authentication');
 
         // Redirect to login page after showing error

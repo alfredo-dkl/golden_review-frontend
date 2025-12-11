@@ -7,17 +7,8 @@ import { apiClient } from '@/lib/api-client';
 
 export const testApiConnection = async () => {
     try {
-        console.log('🔌 Testing API Connection...');
-
-        // Test 1: Health check
-        console.log('1. Testing health endpoint...');
         const healthResponse = await apiClient.get('/health');
-        console.log('✅ Health check:', healthResponse);
-
-        // Test 2: Initiate login (should get auth URL)
-        console.log('2. Testing login initiation...');
         const loginResponse = await apiClient.initiateLogin();
-        console.log('✅ Login initiation:', loginResponse.authUrl);
 
         return {
             success: true,
@@ -35,10 +26,7 @@ export const testApiConnection = async () => {
 
 export const testSessionValidation = async () => {
     try {
-        console.log('🔐 Testing Session Validation...');
-
         const sessionResponse = await apiClient.validateSession();
-        console.log('✅ Session validation:', sessionResponse);
 
         return {
             success: true,

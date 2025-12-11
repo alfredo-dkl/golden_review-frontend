@@ -12,9 +12,9 @@ export const AuthContext = createContext<{
   login: (email: string) => Promise<void>;
   getUser: () => Promise<UserModel | null>;
   updateProfile: (userData: Partial<UserModel>) => Promise<UserModel>;
-  logout: () => void;
+  logout: () => Promise<void>;
   verify: () => Promise<void>;
-  handleCallback: (code: string, state: string) => Promise<{ success: boolean; user: UserModel }>;
+  handleCallback: () => Promise<{ success: boolean; user: UserModel }>;
   isAdmin: boolean;
 }>({
   loading: false,
@@ -24,7 +24,7 @@ export const AuthContext = createContext<{
   login: async () => { },
   getUser: async () => null,
   updateProfile: async () => ({}) as UserModel,
-  logout: () => { },
+  logout: async () => { },
   verify: async () => { },
   handleCallback: async () => ({ success: false, user: {} as UserModel }),
   isAdmin: false,

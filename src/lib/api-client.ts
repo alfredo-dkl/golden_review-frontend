@@ -43,11 +43,13 @@ class ApiClient {
             const data = await response.json();
 
             if (!response.ok) {
+                console.error(`❌ API Error: ${data.error || data.message}`);
                 throw new Error(data.error || data.message || 'Request failed');
             }
 
             return data;
         } catch (error) {
+            console.error(`💥 API Request Failed:`, error);
             console.error(`API request failed: ${endpoint}`, error);
             throw error;
         }
@@ -58,21 +60,26 @@ class ApiClient {
      */
 
     /**
-     * Initiate Microsoft login - get auth URL
+     * Create session with user data from Microsoft authentication
      */
-    async initiateLogin(): Promise<{ success: boolean; authUrl: string; message: string }> {
-        return this.request('/auth/login');
-    }
-
-    /**
-     * Handle callback from Microsoft and create session
-     */
-    async handleAuthCallback(code: string, state: string): Promise<{
+    async createSession(user: {
+        email: string;
+        microsoftId: string;
+        name?: string;
+        firstName?: string;
+        lastName?: string;
+        position?: string;
+        department?: string;
+    }): Promise<{
         success: boolean;
         message: string;
+        user: BackendUser;
     }> {
-        // Session is automatically created in cookie by backend
-        return this.request(`/auth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`);
+        const result = await this.request('/auth/session', {
+            method: 'POST',
+            body: JSON.stringify({ user }),
+        });
+        return result;
     }
 
     /**
