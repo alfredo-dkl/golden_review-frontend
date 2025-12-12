@@ -17,6 +17,12 @@ export default defineConfig({
       cert: fs.readFileSync(path.resolve(__dirname, 'src/ssl/31e810c645f53345.crt')),
       ca: fs.readFileSync(path.resolve(__dirname, 'src/ssl/gd_bundle-g2.crt')),
     },
+    hmr: {
+      protocol: 'wss',
+      host: 'dev-goldenaudit.goldentrustinsurance.com',
+      port: 5173,
+      clientPort: 5173,
+    },
   },
   resolve: {
     alias: {
