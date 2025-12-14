@@ -19,28 +19,28 @@ export function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SettingsProvider>
-          <ThemeProvider>
-            <I18nProvider>
-              <HelmetProvider>
-                <TooltipsProvider>
-                  <QueryProvider>
-                    <LoadingBarContainer>
-                      <BrowserRouter basename={BASE_URL}>
+      <BrowserRouter basename={BASE_URL}>
+        <AuthProvider>
+          <SettingsProvider>
+            <ThemeProvider>
+              <I18nProvider>
+                <HelmetProvider>
+                  <TooltipsProvider>
+                    <QueryProvider>
+                      <LoadingBarContainer>
                         <Toaster />
                         <ModulesProvider>
                           <AppRouting />
                         </ModulesProvider>
-                      </BrowserRouter>
-                    </LoadingBarContainer>
-                  </QueryProvider>
-                </TooltipsProvider>
-              </HelmetProvider>
-            </I18nProvider>
-          </ThemeProvider>
-        </SettingsProvider>
-      </AuthProvider>
+                      </LoadingBarContainer>
+                    </QueryProvider>
+                  </TooltipsProvider>
+                </HelmetProvider>
+              </I18nProvider>
+            </ThemeProvider>
+          </SettingsProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }
