@@ -13,6 +13,16 @@ interface BackendUser {
     position: string;
 }
 
+export interface Policy {
+    policy_number: string;
+    insured_name: string;
+    effective_date: Date;
+    exp_date: Date;
+    carrier: string;
+    premium: number | null;
+    csr: string;
+}
+
 class ApiClient {
     private baseURL: string;
 
@@ -106,6 +116,21 @@ class ApiClient {
     async logout(): Promise<{ success: boolean; message: string }> {
         // Session cookie is cleared by backend
         return this.request('/auth/logout', { method: 'POST' });
+    }
+
+    /**
+     * Policies Methods
+     */
+
+    /**
+     * Get all policies
+     */
+    async getPolicies(): Promise<{
+        success: boolean;
+        count: number;
+        data: Policy[];
+    }> {
+        return this.request('/policies');
     }
 
     /**

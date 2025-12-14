@@ -41,6 +41,7 @@ import {
   Share2,
   Shield,
   ShieldOff,
+  ShieldCheck,
   ShieldUser,
   ShoppingCart,
   SquareMousePointer,
@@ -63,6 +64,14 @@ export const MENU_SIDEBAR: MenuConfig = [
     children: [
       { title: 'Light Sidebar', path: '/' },
       { title: 'Dark Sidebar', path: '/dark-sidebar' },
+    ],
+  },
+  { heading: 'NEW' },
+  {
+    title: 'Audit',
+    icon: ShieldCheck,
+    children: [
+      { title: 'Policies', path: '/audit/policies' },
     ],
   },
   { heading: 'User' },

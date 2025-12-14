@@ -1,9 +1,11 @@
 import { PropsWithChildren, useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MicrosoftAuthAdapter } from '@/auth/adapters/microsoft-adapter';
 import { AuthContext } from '@/auth/context/auth-context';
 import { AuthModel, UserModel } from '@/auth/lib/models';
 
 export function AuthProvider({ children }: PropsWithChildren) {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [auth, setAuth] = useState<AuthModel | undefined>();
     const [currentUser, setCurrentUser] = useState<UserModel | undefined>();
@@ -112,10 +114,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
     // Logout
     const logout = async () => {
         try {
+            setLoading(true);
             await MicrosoftAuthAdapter.logout();
+            console.log('✅ Logout completed successfully');
+        } catch (error) {
+            console.error('❌ Logout error:', error);
         } finally {
+            // Clear local state
             setAuth(undefined);
             setCurrentUser(undefined);
+            setLoading(false);
+            // Navigate to login page
+            navigate('/auth/signin');
         }
     };
 
