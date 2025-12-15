@@ -275,22 +275,12 @@ export const MicrosoftAuthAdapter = {
             if (this.msalInstance) {
                 const accounts = this.msalInstance.getAllAccounts();
                 if (accounts.length > 0) {
-                    try {
-                        // Use logoutPopup instead of logoutRedirect to avoid navigation issues
-                        // This opens a popup window for Microsoft logout
-                        await this.msalInstance.logoutPopup({
-                            account: accounts[0],
-                            mainWindowRedirectUri: window.location.origin + '/auth/signin',
-                        });
-                        console.log('✅ Microsoft logout successful');
-                    } catch (msalError) {
-                        console.error('⚠️ Microsoft logout error:', msalError);
-                        // If popup fails, fallback to redirect
-                        await this.msalInstance.logoutRedirect({
-                            account: accounts[0],
-                            postLogoutRedirectUri: window.location.origin + '/auth/signin',
-                        });
-                    }
+                    // Use logoutRedirect to avoid popup and perform front-channel sign-out
+                    await this.msalInstance.logoutRedirect({
+                        account: accounts[0],
+                        postLogoutRedirectUri: window.location.origin + '/auth/signin',
+                    });
+                    console.log('✅ Microsoft logout via redirect successful');
                 } else {
                     console.log('ℹ️ No Microsoft accounts to logout from');
                 }
