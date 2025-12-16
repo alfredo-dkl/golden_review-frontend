@@ -175,6 +175,9 @@ export const MicrosoftAuthAdapter = {
             // Get user profile from Microsoft Graph
             const graphUser = await this.getUserFromGraph(tokenResponse.accessToken);
 
+            // Debug: inspect raw Microsoft Graph user payload
+            console.log('🔍 Microsoft Graph user payload:', graphUser);
+
             // Create session in backend with user data
             const sessionData = {
                 email: graphUser.mail || graphUser.userPrincipalName,
@@ -187,6 +190,9 @@ export const MicrosoftAuthAdapter = {
             };
 
             const sessionResponse = await apiClient.createSession(sessionData);
+
+            // Debug: inspect backend user payload shape vs. UserModel
+            console.log('🔍 Backend user payload:', sessionResponse.user);
 
             return {
                 user: this.mapBackendUserToUserModel(sessionResponse.user),
@@ -231,6 +237,9 @@ export const MicrosoftAuthAdapter = {
         }
 
         const userData = await response.json();
+
+        console.log('✅ MicrosoftAuthAdapter: Fetched user from Graph API:', userData);
+
         return userData;
     },
 

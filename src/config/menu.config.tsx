@@ -37,11 +37,11 @@ import {
   Users as PeopleIcon,
   Plug,
   ScrollText,
+  Search,
   Settings,
   Share2,
   Shield,
   ShieldOff,
-  ShieldCheck,
   ShieldUser,
   ShoppingCart,
   SquareMousePointer,
@@ -69,7 +69,7 @@ export const MENU_SIDEBAR: MenuConfig = [
   { heading: 'NEW' },
   {
     title: 'Audit',
-    icon: ShieldCheck,
+    icon: Search,
     children: [
       { title: 'Policies', path: '/audit/policies' },
     ],

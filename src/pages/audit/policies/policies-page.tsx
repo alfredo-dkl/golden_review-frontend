@@ -12,7 +12,7 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
-import { Search, X, FileText } from 'lucide-react';
+import { Search, X, MoreVertical, Download } from 'lucide-react';
 import { apiClient, Policy } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardTable } from '@/components/ui/card';
@@ -28,34 +28,68 @@ const PoliciesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 25,
   });
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  // Fetch policies from backend
+  // Fetch policies from backend with server-side pagination
   const { data: policiesData, isLoading, error } = useQuery({
-    queryKey: ['policies'],
+    queryKey: ['policies', pagination.pageIndex, pagination.pageSize, searchQuery],
     queryFn: async () => {
-      const response = await apiClient.getPolicies();
+      const response = await apiClient.getPolicies({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        search: searchQuery,
+      });
       return response;
     },
   });
 
-  // Filter policies based on search query
+  // Get policies from server response (filtering is done server-side)
   const filteredPolicies = useMemo(() => {
-    const policies = policiesData?.data || [];
-    
-    if (!searchQuery) return policies;
+    return policiesData?.data || [];
+  }, [policiesData?.data]);
 
-    const query = searchQuery.toLowerCase();
-    return policies.filter(
-      (policy) =>
-        policy.policy_number?.toLowerCase().includes(query) ||
-        policy.insured_name?.toLowerCase().includes(query) ||
-        policy.carrier?.toLowerCase().includes(query) ||
-        policy.csr?.toLowerCase().includes(query)
-    );
-  }, [policiesData?.data, searchQuery]);
+  // Download CSV handler
+  const handleDownloadCSV = async () => {
+    try {
+      const response = await apiClient.getPolicies({
+        page: 1,
+        limit: 10000,
+        search: searchQuery,
+      });
+      
+      const policies = response.data || [];
+      
+      // Create CSV content
+      const headers = ['Policy Number', 'Insured Name', 'Carrier', 'Effective Date', 'Expiration Date', 'Premium', 'CSR'];
+      const csvContent = [
+        headers.join(','),
+        ...policies.map((policy: Policy) => [
+          `"${policy.policy_number || ''}"`,
+          `"${policy.insured_name || ''}"`,
+          `"${policy.carrier || ''}"`,
+          formatDate(policy.effective_date),
+          formatDate(policy.exp_date),
+          policy.premium !== null ? policy.premium : '',
+          `"${policy.csr || ''}"`,
+        ].join(','))
+      ].join('\n');
+
+      // Create and trigger download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `policies_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading CSV:', error);
+    }
+  };
 
   // Format date helper
   const formatDate = (date: Date | string) => {
@@ -88,7 +122,6 @@ const PoliciesPage = () => {
         ),
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
-            <FileText className="size-4 text-muted-foreground" />
             <span className="font-medium">{row.original.policy_number}</span>
           </div>
         ),
@@ -173,6 +206,18 @@ const PoliciesPage = () => {
         enableSorting: true,
         size: 150,
       },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: () => (
+          <Button mode="icon" variant="ghost" size="sm">
+            <MoreVertical className="size-4" />
+          </Button>
+        ),
+        enableSorting: false,
+        enablePinning: true,
+        size: 80,
+      },
     ],
     []
   );
@@ -180,11 +225,14 @@ const PoliciesPage = () => {
   const table = useReactTable({
     columns,
     data: filteredPolicies,
-    pageCount: Math.ceil((filteredPolicies?.length || 0) / pagination.pageSize),
+    pageCount: policiesData?.totalPages || 0,
     getRowId: (row: Policy) => row.policy_number,
     state: {
       pagination,
       sorting,
+      columnPinning: {
+        right: ['actions'],
+      },
     },
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
@@ -192,6 +240,8 @@ const PoliciesPage = () => {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
+    enableColumnPinning: true,
   });
 
   // Show error state
@@ -231,14 +281,24 @@ const PoliciesPage = () => {
       <Card className="min-w-full">
         <CardHeader className="py-5 flex-wrap gap-2">
           <div className="flex items-center justify-between w-full gap-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-1">
               <h2 className="text-xl font-semibold">Policies</h2>
               {!isLoading && (
                 <span className="text-sm text-muted-foreground">
-                  {filteredPolicies.length} {filteredPolicies.length === 1 ? 'policy' : 'policies'}
+                  {policiesData?.count || 0} {policiesData?.count === 1 ? 'policy' : 'policies'}
                 </span>
               )}
             </div>
+
+            <Button
+              onClick={handleDownloadCSV}
+              variant="secondary"
+              size="sm"
+              disabled={isLoading || !filteredPolicies.length}
+            >
+              <Download className="size-4 mr-2" />
+              Download CSV
+            </Button>
 
             <div className="relative w-full max-w-[300px]">
               <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
