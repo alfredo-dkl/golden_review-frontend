@@ -10,7 +10,13 @@ export function SidebarFooter() {
     <div className="flex flex-center justify-between shrink-0 ps-4 pe-3.5 h-14">
       <UserDropdownMenu
         trigger={
-          <UserAvatar className="border-2 border-secondary shrink-0 cursor-pointer" />
+          <Button
+            variant="ghost"
+            mode="icon"
+            className="size-9 hover:bg-background"
+          >
+            <UserAvatar className="border-2 border-secondary shrink-0" />
+          </Button>
         }
       />
 

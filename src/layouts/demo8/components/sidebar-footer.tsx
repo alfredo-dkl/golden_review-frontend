@@ -35,7 +35,13 @@ export function SidebarFooter() {
 
       <UserDropdownMenu
         trigger={
-          <UserAvatar className="size-8 rounded-lg border-2 border-mono/30 shrink-0 cursor-pointer" />
+          <Button
+            variant="ghost"
+            mode="icon"
+            className="size-8 p-0 hover:bg-background"
+          >
+            <UserAvatar className="size-8 rounded-lg border-2 border-mono/30 shrink-0" />
+          </Button>
         }
       />
     </div>

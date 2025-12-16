@@ -85,7 +85,14 @@ export function HeaderTopbar() {
 
             <UserDropdownMenu
               trigger={
-                <UserAvatar className="cursor-pointer border-2 border-mono/25 shrink-0" />
+                <Button
+                  variant="ghost"
+                  mode="icon"
+                  shape="circle"
+                  className="size-9"
+                >
+                  <UserAvatar className="border-2 border-mono/25 shrink-0" />
+                </Button>
               }
             />
           </>

@@ -180,7 +180,14 @@ export function Header() {
               />
               <UserDropdownMenu
                 trigger={
-                  <UserAvatar className="border-2 border-green-500 shrink-0 cursor-pointer" />
+                  <Button
+                    variant="ghost"
+                    mode="icon"
+                    shape="circle"
+                    className="size-9 hover:bg-primary/10"
+                  >
+                    <UserAvatar className="border-2 border-green-500 shrink-0" />
+                  </Button>
                 }
               />
             </>

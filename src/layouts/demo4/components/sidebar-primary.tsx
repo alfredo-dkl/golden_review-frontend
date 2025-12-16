@@ -204,7 +204,13 @@ export function SidebarPrimary() {
           />
           <UserDropdownMenu
             trigger={
-              <UserAvatar className="border border-border shrink-0 cursor-pointer" />
+              <Button
+                variant="ghost"
+                mode="icon"
+                className="size-9 hover:bg-background hover:[&_svg]:text-primary"
+              >
+                <UserAvatar className="border border-border shrink-0" />
+              </Button>
             }
           />
         </div>
