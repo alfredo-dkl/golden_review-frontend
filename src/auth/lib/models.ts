@@ -19,6 +19,7 @@ export interface UserModel {
   first_name: string;
   last_name: string;
   fullname?: string; // May be stored directly in metadata
+  display_name?: string;
   email_verified?: boolean;
   occupation?: string;
   company_name?: string; // Using snake_case consistently

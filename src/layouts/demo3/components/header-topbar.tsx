@@ -4,6 +4,7 @@ import { AppsDropdownMenu } from '@/partials/topbar/apps-dropdown-menu';
 import { ChatSheet } from '@/partials/topbar/chat-sheet';
 import { NotificationsSheet } from '@/partials/topbar/notifications-sheet';
 import { UserDropdownMenu } from '@/partials/topbar/user-dropdown-menu';
+import { UserAvatar } from '@/partials/topbar/user-avatar';
 import {
   LayoutGrid,
   MessageCircleMore,
@@ -11,7 +12,6 @@ import {
   Search,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { toAbsoluteUrl } from '@/lib/helpers';
 import { Button } from '@/components/ui/button';
 
 export function HeaderTopbar() {
@@ -77,11 +77,7 @@ export function HeaderTopbar() {
             />
             <UserDropdownMenu
               trigger={
-                <img
-                  className="size-9 rounded-full border-2 border-input shrink-0 cursor-pointer"
-                  src={toAbsoluteUrl('/media/avatars/gray/5.png')}
-                  alt="User Avatar"
-                />
+                <UserAvatar className="border-2 border-input shrink-0 cursor-pointer" />
               }
             />
           </>

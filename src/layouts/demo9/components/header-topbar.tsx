@@ -3,9 +3,9 @@ import { DropdownMenu2 } from '@/partials/dropdown-menu/dropdown-menu-2';
 import { ChatSheet } from '@/partials/topbar/chat-sheet';
 import { NotificationsSheet } from '@/partials/topbar/notifications-sheet';
 import { UserDropdownMenu } from '@/partials/topbar/user-dropdown-menu';
+import { UserAvatar } from '@/partials/topbar/user-avatar';
 import { ChevronDown, MessageCircleMore, MessageSquareDot } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { toAbsoluteUrl } from '@/lib/helpers';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -48,11 +48,7 @@ export function HeaderTopbar() {
 
             <UserDropdownMenu
               trigger={
-                <img
-                  className="ms-2.5 size-9 rounded-full border-2 border-success shrink-0 cursor-pointer"
-                  src={toAbsoluteUrl('/media/avatars/300-2.png')}
-                  alt="User Avatar"
-                />
+                <UserAvatar className="ms-2.5 border-2 border-success shrink-0 cursor-pointer" />
               }
             />
           </div>

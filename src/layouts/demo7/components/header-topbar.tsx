@@ -1,5 +1,6 @@
 import { StoreClientTopbar } from '@/pages/store-client/components/common/topbar';
 import { UserDropdownMenu } from '@/partials/topbar/user-dropdown-menu';
+import { UserAvatar } from '@/partials/topbar/user-avatar';
 import { ArrowUp, Crown } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -36,8 +37,8 @@ const HeaderTopbar = () => {
 
           <UserDropdownMenu
             trigger={
-              <div className="cursor-pointer size-[34px] rounded-full inline-flex items-center justify-center relative text-lg font-medium border border-input bg-muted">
-                S
+              <div className="relative inline-flex cursor-pointer">
+                <UserAvatar className="size-[34px] border border-input bg-muted text-lg font-medium" />
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="15"

@@ -3,9 +3,9 @@ import { SearchDialog } from '@/partials/dialogs/search/search-dialog';
 import { ChatSheet } from '@/partials/topbar/chat-sheet';
 import { NotificationsSheet } from '@/partials/topbar/notifications-sheet';
 import { UserDropdownMenu } from '@/partials/topbar/user-dropdown-menu';
+import { UserAvatar } from '@/partials/topbar/user-avatar';
 import { MessageCircleMore, MessageSquareDot, Search } from 'lucide-react';
 import { useLocation } from 'react-router';
-import { toAbsoluteUrl } from '@/lib/helpers';
 import { Button } from '@/components/ui/button';
 
 export function HeaderTopbar() {
@@ -58,11 +58,7 @@ export function HeaderTopbar() {
           </div>
           <UserDropdownMenu
             trigger={
-              <img
-                className="cursor-pointer size-9 rounded-full justify-center border border-gray-500 shrink-0"
-                src={toAbsoluteUrl('/media/avatars/gray/5.png')}
-                alt=""
-              />
+              <UserAvatar className="cursor-pointer border border-gray-500 shrink-0" />
             }
           />
         </div>

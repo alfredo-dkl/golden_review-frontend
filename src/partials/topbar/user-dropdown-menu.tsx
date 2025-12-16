@@ -18,10 +18,10 @@ import {
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Link } from 'react-router';
-import { toAbsoluteUrl } from '@/lib/helpers';
 import { useLanguage } from '@/providers/i18n-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { UserAvatar } from '@/partials/topbar/user-avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,28 +43,13 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
 
   // Use display data from currentUser
   const displayName =
+    user?.display_name ||
     user?.fullname ||
     (user?.first_name && user?.last_name
       ? `${user.first_name} ${user.last_name}`
       : user?.username || 'User');
 
   const displayEmail = user?.email || '';
-  const displayAvatar = user?.pic || null;
-  const fallbackInitials = (() => {
-    const nameSource =
-      user?.fullname ||
-      (user?.first_name && user?.last_name
-        ? `${user.first_name} ${user.last_name}`
-        : user?.username) ||
-      user?.email;
-
-    if (!nameSource) return 'U';
-
-    const parts = nameSource.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return 'U';
-    if (parts.length === 1) return parts[0][0]?.toUpperCase() || 'U';
-    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-  })();
 
   const handleLanguage = (lang: Language) => {
     changeLanguage(lang);
@@ -81,17 +66,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
         {/* Header */}
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-2">
-            {displayAvatar ? (
-              <img
-                className="size-9 rounded-full border-2 border-green-500 object-cover"
-                src={displayAvatar.startsWith('http') ? displayAvatar : toAbsoluteUrl(displayAvatar)}
-                alt="User avatar"
-              />
-            ) : (
-              <span className="size-9 rounded-full border-2 border-green-500 bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
-                {fallbackInitials}
-              </span>
-            )}
+            <UserAvatar className="border-2 border-green-500" />
             <div className="flex flex-col">
               <Link
                 to="/account/home/get-started"
