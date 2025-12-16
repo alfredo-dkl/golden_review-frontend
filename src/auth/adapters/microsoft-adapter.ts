@@ -175,9 +175,6 @@ export const MicrosoftAuthAdapter = {
             // Get user profile from Microsoft Graph
             const graphUser = await this.getUserFromGraph(tokenResponse.accessToken);
 
-            // Debug: inspect raw Microsoft Graph user payload
-            console.log('🔍 Microsoft Graph user payload:', graphUser);
-
             // Create session in backend with user data
             const sessionData = {
                 email: graphUser.mail || graphUser.userPrincipalName,
@@ -190,9 +187,6 @@ export const MicrosoftAuthAdapter = {
             };
 
             const sessionResponse = await apiClient.createSession(sessionData);
-
-            // Debug: inspect backend user payload shape vs. UserModel
-            console.log('🔍 Backend user payload:', sessionResponse.user);
 
             return {
                 user: this.mapBackendUserToUserModel(sessionResponse.user),
@@ -238,8 +232,6 @@ export const MicrosoftAuthAdapter = {
 
         const userData = await response.json();
 
-        console.log('✅ MicrosoftAuthAdapter: Fetched user from Graph API:', userData);
-
         return userData;
     },
 
@@ -274,7 +266,6 @@ export const MicrosoftAuthAdapter = {
             // 1. Backend will clear the session cookie and database session
             try {
                 await apiClient.logout();
-                console.log('✅ Backend session closed successfully');
             } catch (backendError) {
                 console.error('⚠️ Backend logout error:', backendError);
                 // Continue with Microsoft logout even if backend fails
@@ -289,7 +280,6 @@ export const MicrosoftAuthAdapter = {
                         account: accounts[0],
                         postLogoutRedirectUri: window.location.origin + '/auth/signin',
                     });
-                    console.log('✅ Microsoft logout via redirect successful');
                 } else {
                     console.log('ℹ️ No Microsoft accounts to logout from');
                 }
@@ -309,20 +299,22 @@ export const MicrosoftAuthAdapter = {
         name: string;
         department: string;
         position: string;
+        photoUrl?: string | null;
     }): UserModel {
+        const fullname = backendUser.name || '';
         return {
             id: backendUser.id,
             email: backendUser.email,
             email_verified: true,
-            fullname: backendUser.name,
-            first_name: backendUser.name.split(' ')[0] || '',
-            last_name: backendUser.name.split(' ').slice(1).join(' ') || '',
+            fullname,
+            first_name: fullname.split(' ')[0] || '',
+            last_name: fullname.split(' ').slice(1).join(' ') || '',
             username: backendUser.email.split('@')[0] || backendUser.id,
             company_name: 'Golden Trust',
             occupation: backendUser.position,
             phone: '',
             roles: [],
-            pic: '',
+            pic: backendUser.photoUrl || '',
             language: 'en' as const,
             is_admin: false, // Will be set based on backend logic
             isMicrosoftLogin: true,

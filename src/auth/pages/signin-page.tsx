@@ -4,16 +4,12 @@ import { useSearchParams } from 'react-router-dom';
 import { AlertCircle, LoaderCircleIcon } from 'lucide-react';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Icons } from '@/components/common/icons';
-import { ALLOWED_EMAIL_DOMAIN } from '@/auth/lib/msal-config';
 
 export function SignInPage() {
   const [searchParams] = useSearchParams();
   const { login } = useAuth();
 
-  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,29 +26,12 @@ export function SignInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email.trim()) {
-      setError('Please enter your email address');
-      return;
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
-    // Domain validation - only allow specific domain emails
-    if (!email.endsWith(ALLOWED_EMAIL_DOMAIN)) {
-      setError(`Only ${ALLOWED_EMAIL_DOMAIN} email addresses are allowed`);
-      return;
-    }
-
     try {
       setIsLoading(true);
       setError(null);
       // login() will redirect to Microsoft - code after this won't execute
-      await login(email);
+      // Pass empty string since GoDaddy/Microsoft will handle email prompt
+      await login('');
       // Note: The following code never runs because login() redirects the page
     } catch (err) {
       console.error('Microsoft sign-in error:', err);
@@ -67,10 +46,10 @@ export function SignInPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 space-y-6">
-      <div className="text-center space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-semibold tracking-tight">Welcome to GoldenAudit👋</h1>
         <p className="text-sm text-muted-foreground">
-          Enter your {ALLOWED_EMAIL_DOMAIN} email to sign in with Microsoft.
+          Please sign-in to your account and start the adventure
         </p>
       </div>
 
@@ -84,25 +63,9 @@ export function SignInPage() {
       )}
 
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email address <span className="text-red-500">*</span></Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder={`yourname${ALLOWED_EMAIL_DOMAIN}`}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-            className="w-full"
-            autoComplete="email"
-            autoFocus
-            required
-          />
-        </div>
-
         <Button
           type="submit"
-          disabled={isLoading || !email.trim()}
+          disabled={isLoading}
           className="w-full flex items-center gap-2"
         >
           {isLoading ? (

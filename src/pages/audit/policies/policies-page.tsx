@@ -338,7 +338,7 @@ const PoliciesPage = () => {
         </CardTable>
 
         <CardFooter>
-          <DataGridPagination />
+          <DataGridPagination sizes={[25, 50, 100]} />
         </CardFooter>
       </Card>
     </DataGrid>

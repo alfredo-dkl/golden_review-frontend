@@ -49,8 +49,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
       : user?.username || 'User');
 
   const displayEmail = user?.email || '';
-  // const displayAvatar = user?.pic || toAbsoluteUrl('/media/avatars/300-2.png');
-  const displayAvatar = toAbsoluteUrl('/media/avatars/300-2.png');
+  const displayAvatar = user?.pic || toAbsoluteUrl('/media/avatars/300-2.png');
 
   const handleLanguage = (lang: Language) => {
     changeLanguage(lang);
