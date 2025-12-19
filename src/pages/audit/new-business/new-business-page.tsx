@@ -32,14 +32,19 @@ const NewBusinessPage = () => {
   });
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  // Fetch policies from backend with server-side pagination
+  // Fetch policies from backend with server-side pagination and sorting
   const { data: policiesData, isLoading, error } = useQuery({
-    queryKey: ['policies', pagination.pageIndex, pagination.pageSize, searchQuery],
+    queryKey: ['policies', pagination.pageIndex, pagination.pageSize, searchQuery, sorting],
     queryFn: async () => {
+      const sortField = sorting.length > 0 ? sorting[0].id : undefined;
+      const sortDirection = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : undefined;
+
       const response = await apiClient.getNewBusiness({
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         search: searchQuery,
+        sortBy: sortField,
+        sortOrder: sortDirection as 'asc' | 'desc' | undefined,
       });
       return response;
     },
@@ -240,6 +245,7 @@ const NewBusinessPage = () => {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    manualSorting: true,
     manualPagination: true,
     enableColumnPinning: true,
   });
