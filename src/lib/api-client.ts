@@ -11,6 +11,7 @@ interface BackendUser {
     name: string;
     department: string;
     position: string;
+    roles?: string[];
 }
 
 export interface Policy {
@@ -80,6 +81,7 @@ class ApiClient {
         lastName?: string;
         position?: string;
         department?: string;
+        roles?: string[];
     }): Promise<{
         success: boolean;
         message: string;

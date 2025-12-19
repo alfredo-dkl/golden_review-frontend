@@ -172,10 +172,13 @@ export const MicrosoftAuthAdapter = {
                 account: account,
             });
 
+            // Extract roles from ID token claims
+            const roles = response.idTokenClaims?.roles || tokenResponse.idTokenClaims?.roles || [];
+
             // Get user profile from Microsoft Graph
             const graphUser = await this.getUserFromGraph(tokenResponse.accessToken);
 
-            // Create session in backend with user data
+            // Create session in backend with user data including roles
             const sessionData = {
                 email: graphUser.mail || graphUser.userPrincipalName,
                 microsoftId: graphUser.id,
@@ -184,6 +187,7 @@ export const MicrosoftAuthAdapter = {
                 lastName: graphUser.surname,
                 position: graphUser.jobTitle,
                 department: graphUser.department,
+                roles: Array.isArray(roles) ? roles : [],
             };
 
             const sessionResponse = await apiClient.createSession(sessionData);
@@ -299,9 +303,12 @@ export const MicrosoftAuthAdapter = {
         name: string;
         department: string;
         position: string;
+        roles?: string[];
         photoUrl?: string | null;
     }): UserModel {
         const fullname = backendUser.name || '';
+        // Convert string roles to numbers for compatibility, or keep as empty if you want to change UserModel
+        const roleNumbers = (backendUser.roles || []).map((_, index) => index);
         return {
             id: backendUser.id,
             email: backendUser.email,
@@ -313,7 +320,7 @@ export const MicrosoftAuthAdapter = {
             company_name: 'Golden Trust',
             occupation: backendUser.position,
             phone: '',
-            roles: [],
+            roles: roleNumbers,
             pic: backendUser.photoUrl || '',
             language: 'en' as const,
             is_admin: false, // Will be set based on backend logic
