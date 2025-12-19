@@ -1,2 +1,2 @@
-export { NewBusiness } from './new-business';
-export { Renewals } from './renewals';
+export { NewBusinessPage } from './new-business';
+export { RenewalsPage } from './renewals';

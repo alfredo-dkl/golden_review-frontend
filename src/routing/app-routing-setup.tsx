@@ -43,7 +43,7 @@ import {
   AuthWelcomeMessagePage,
 } from '@/pages/auth';
 import { DefaultPage, Demo1DarkSidebarPage } from '@/pages/dashboards';
-import { PoliciesPage } from '@/pages/audit/policies';
+import { RenewalsPage, NewBusinessPage } from '@/pages/audit';
 import {
   NetworkAppRosterPage,
   NetworkAuthorPage,
@@ -102,7 +102,8 @@ export function AppRoutingSetup() {
         <Route element={<Demo1Layout />}>
           <Route path="/" element={<DefaultPage />} />
           <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
-          <Route path="/audit/policies" element={<PoliciesPage />} />
+          <Route path="/audit/new-business" element={<NewBusinessPage />} />
+          <Route path="/audit/renewals" element={<RenewalsPage />} />
           <Route
             path="/public-profile/profiles/default/"
             element={<ProfileDefaultPage />}

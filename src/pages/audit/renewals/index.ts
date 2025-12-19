@@ -1,1 +1,1 @@
-export { Renewals } from './renewals-page';
+export { RenewalsPage } from './renewals-page';

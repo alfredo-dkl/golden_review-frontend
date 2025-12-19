@@ -1,1 +1,1 @@
-export { NewBusiness } from './new-business-page';
+export { NewBusinessPage } from './new-business-page';

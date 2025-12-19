@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const Renewals = () => {
+const RenewalsPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
@@ -345,4 +345,4 @@ const Renewals = () => {
     );
 };
 
-export { Renewals };
+export { RenewalsPage };
