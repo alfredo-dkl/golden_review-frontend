@@ -85,7 +85,11 @@ class ApiClient {
         message: string;
         user: BackendUser;
     }> {
-        const result = await this.request('/auth/session', {
+        const result = await this.request<{
+            success: boolean;
+            message: string;
+            user: BackendUser;
+        }>('/auth/session', {
             method: 'POST',
             body: JSON.stringify({ user }),
         });
