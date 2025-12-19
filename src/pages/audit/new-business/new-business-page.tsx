@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const PoliciesPage = () => {
+const NewBusiness = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -36,7 +36,7 @@ const PoliciesPage = () => {
   const { data: policiesData, isLoading, error } = useQuery({
     queryKey: ['policies', pagination.pageIndex, pagination.pageSize, searchQuery],
     queryFn: async () => {
-      const response = await apiClient.getPolicies({
+      const response = await apiClient.getNewBusiness({
         page: pagination.pageIndex + 1,
         limit: pagination.pageSize,
         search: searchQuery,
@@ -53,14 +53,14 @@ const PoliciesPage = () => {
   // Download CSV handler
   const handleDownloadCSV = async () => {
     try {
-      const response = await apiClient.getPolicies({
+      const response = await apiClient.getNewBusiness({
         page: 1,
         limit: 10000,
         search: searchQuery,
       });
-      
+
       const policies = response.data || [];
-      
+
       // Create CSV content
       const headers = ['Policy Number', 'Insured Name', 'Carrier', 'Effective Date', 'Expiration Date', 'Premium', 'CSR'];
       const csvContent = [
@@ -345,4 +345,4 @@ const PoliciesPage = () => {
   );
 };
 
-export { PoliciesPage };
+export { NewBusiness };

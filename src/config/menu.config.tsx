@@ -71,7 +71,8 @@ export const MENU_SIDEBAR: MenuConfig = [
     title: 'Audit',
     icon: Search,
     children: [
-      { title: 'Policies', path: '/audit/policies' },
+      { title: 'New Business', path: '/audit/new-business' },
+      { title: 'Renewals', path: '/audit/renewals' },
     ],
   },
   { heading: 'User' },
