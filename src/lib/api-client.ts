@@ -24,6 +24,29 @@ export interface Policy {
     csr: string;
 }
 
+export interface UserCarrierLink {
+    carrierId: string;
+    carrierName: string | null;
+}
+
+export interface UserCarrierRow {
+    userId: string;
+    name: string;
+    email: string;
+    department?: string | null;
+    position?: string | null;
+    carriers: UserCarrierLink[];
+}
+
+export interface UserCarriersResponse {
+    success: boolean;
+    count: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    data: UserCarrierRow[];
+}
+
 class ApiClient {
     private baseURL: string;
 
@@ -179,6 +202,24 @@ class ApiClient {
 
         const endpoint = `/policies/renewals${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
         return this.request(endpoint);
+    }
+
+    async getUserCarriers(params?: {
+        page?: number;
+        limit?: number;
+        search?: string;
+        sortBy?: string;
+        sortOrder?: 'asc' | 'desc';
+    }): Promise<UserCarriersResponse> {
+        const queryParams = new URLSearchParams();
+        if (params?.page) queryParams.append('page', params.page.toString());
+        if (params?.limit) queryParams.append('limit', params.limit.toString());
+        if (params?.search) queryParams.append('search', params.search);
+        if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+        if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+
+        const endpoint = `/users/carriers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        return this.get(endpoint);
     }
 
     /**
