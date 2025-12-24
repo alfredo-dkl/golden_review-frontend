@@ -75,6 +75,11 @@ export const MENU_SIDEBAR: MenuConfig = [
       { title: 'Renewals', path: '/audit/renewals' },
     ],
   },
+  {
+    title: 'Users',
+    icon: Users,
+    path: '/users/user-carriers',
+  },
   { heading: 'User' },
   {
     title: 'Public Profile',

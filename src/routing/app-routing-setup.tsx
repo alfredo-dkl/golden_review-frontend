@@ -94,6 +94,7 @@ import {
   WishlistPage,
 } from '@/pages/store-client';
 import { Navigate, Route, Routes } from 'react-router';
+import { UserCarriersPage } from '@/pages/users';
 
 export function AppRoutingSetup() {
   return (
@@ -104,6 +105,7 @@ export function AppRoutingSetup() {
           <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
           <Route path="/audit/new-business" element={<NewBusinessPage />} />
           <Route path="/audit/renewals" element={<RenewalsPage />} />
+          <Route path="/users/user-carriers" element={<UserCarriersPage />} />
           <Route
             path="/public-profile/profiles/default/"
             element={<ProfileDefaultPage />}
