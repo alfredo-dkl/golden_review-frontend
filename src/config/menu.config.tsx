@@ -78,7 +78,9 @@ export const MENU_SIDEBAR: MenuConfig = [
   {
     title: 'Users',
     icon: Users,
-    path: '/users/user-carriers',
+    children: [
+      { title: 'User Carriers', path: '/users/user-carriers' },
+    ],
   },
   { heading: 'User' },
   {
