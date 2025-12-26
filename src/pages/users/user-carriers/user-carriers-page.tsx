@@ -22,6 +22,7 @@ import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EditCarriersDialog } from './edit-carriers-dialog';
 
 const UserCarriersPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -30,6 +31,13 @@ const UserCarriersPage = () => {
         pageSize: 10,
     });
     const [sorting, setSorting] = useState<SortingState>([]);
+    const [editingUser, setEditingUser] = useState<UserCarrierRow | null>(null);
+    const [dialogOpen, setDialogOpen] = useState(false);
+
+    const handleEditUser = (user: UserCarrierRow) => {
+        setEditingUser(user);
+        setDialogOpen(true);
+    };
 
     const { data, isLoading, error } = useQuery({
         queryKey: ['user-carriers', pagination.pageIndex, pagination.pageSize, searchQuery, sorting],
@@ -107,6 +115,24 @@ const UserCarriersPage = () => {
                 enableSorting: false,
                 size: 240,
             },
+            {
+                id: 'actions',
+                header: 'Actions',
+                cell: ({ row }) => (
+                    <Button
+                        mode="link"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditUser(row.original)}
+                    >
+                        Edit
+                    </Button>
+                ),
+                enableSorting: false,
+                enableHiding: false,
+                enablePinning: true,
+                size: 100,
+            },
         ],
         [formatCarriers]
     );
@@ -119,6 +145,9 @@ const UserCarriersPage = () => {
         state: {
             pagination,
             sorting,
+            columnPinning: {
+                right: ['actions'],
+            },
         },
         onPaginationChange: setPagination,
         onSortingChange: setSorting,
@@ -127,6 +156,7 @@ const UserCarriersPage = () => {
         getSortedRowModel: getSortedRowModel(),
         manualPagination: true,
         manualSorting: true,
+        enableColumnPinning: true,
     });
 
     if (error) {
@@ -149,71 +179,79 @@ const UserCarriersPage = () => {
     }
 
     return (
-        <DataGrid
-            table={table}
-            recordCount={data?.count || 0}
-            isLoading={isLoading}
-            tableLayout={{
-                columnsPinnable: false,
-                columnsMovable: true,
-                columnsVisibility: false,
-                cellBorder: true,
-            }}
-        >
-            <Card className="min-w-full">
-                <CardHeader className="py-5 flex-wrap gap-2">
-                    <div className="flex items-center justify-between w-full gap-4">
-                        <div className="flex items-center gap-4 flex-1">
-                            <h2 className="text-xl font-semibold">User Carriers</h2>
-                            {!isLoading && (
-                                <span className="text-sm text-muted-foreground">
-                                    {data?.count || 0} {data?.count === 1 ? 'user' : 'users'}
-                                </span>
-                            )}
-                        </div>
+        <>
+            <EditCarriersDialog
+                user={editingUser}
+                open={dialogOpen}
+                onOpenChange={setDialogOpen}
+            />
 
-                        <div className="relative w-full max-w-[300px]">
-                            <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
-                            <Input
-                                placeholder="Search users or carriers..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="ps-9"
-                            />
-                            {searchQuery.length > 0 && (
-                                <Button
-                                    mode="icon"
-                                    variant="ghost"
-                                    className="absolute end-1.5 top-1/2 -translate-y-1/2 h-6 w-6"
-                                    onClick={() => setSearchQuery('')}
-                                >
-                                    <X />
-                                </Button>
-                            )}
-                        </div>
-                    </div>
-                </CardHeader>
-
-                <CardTable>
-                    <ScrollArea>
-                        {isLoading ? (
-                            <div className="p-8 space-y-4">
-                                {[...Array(5)].map((_, i) => (
-                                    <Skeleton key={i} className="h-12 w-full" />
-                                ))}
+            <DataGrid
+                table={table}
+                recordCount={data?.count || 0}
+                isLoading={isLoading}
+                tableLayout={{
+                    columnsPinnable: false,
+                    columnsMovable: true,
+                    columnsVisibility: false,
+                    cellBorder: true,
+                }}
+            >
+                <Card className="min-w-full">
+                    <CardHeader className="py-5 flex-wrap gap-2">
+                        <div className="flex items-center justify-between w-full gap-4">
+                            <div className="flex items-center gap-4 flex-1">
+                                <h2 className="text-xl font-semibold">User Carriers</h2>
+                                {!isLoading && (
+                                    <span className="text-sm text-muted-foreground">
+                                        {data?.count || 0} {data?.count === 1 ? 'user' : 'users'}
+                                    </span>
+                                )}
                             </div>
-                        ) : (
-                            <DataGridTable />
-                        )}
-                        <ScrollBar orientation="horizontal" />
-                    </ScrollArea>
-                </CardTable>
 
-                <CardFooter>
-                    <DataGridPagination sizes={[10, 25, 50]} />
-                </CardFooter>
-            </Card>
-        </DataGrid>
+                            <div className="relative w-full max-w-[300px]">
+                                <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
+                                <Input
+                                    placeholder="Search users or carriers..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="ps-9"
+                                />
+                                {searchQuery.length > 0 && (
+                                    <Button
+                                        mode="icon"
+                                        variant="ghost"
+                                        className="absolute end-1.5 top-1/2 -translate-y-1/2 h-6 w-6"
+                                        onClick={() => setSearchQuery('')}
+                                    >
+                                        <X />
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    </CardHeader>
+
+                    <CardTable>
+                        <ScrollArea>
+                            {isLoading ? (
+                                <div className="p-8 space-y-4">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Skeleton key={i} className="h-12 w-full" />
+                                    ))}
+                                </div>
+                            ) : (
+                                <DataGridTable />
+                            )}
+                            <ScrollBar orientation="horizontal" />
+                        </ScrollArea>
+                    </CardTable>
+
+                    <CardFooter>
+                        <DataGridPagination sizes={[10, 25, 50]} />
+                    </CardFooter>
+                </Card>
+            </DataGrid>
+        </>
     );
 };
 

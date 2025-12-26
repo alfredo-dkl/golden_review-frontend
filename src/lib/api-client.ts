@@ -24,6 +24,11 @@ export interface Policy {
     csr: string;
 }
 
+export interface Carrier {
+    id: string;
+    name: string;
+}
+
 export interface UserCarrierLink {
     carrierId: string;
     carrierName: string | null;
@@ -220,6 +225,18 @@ class ApiClient {
 
         const endpoint = `/users/carriers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
         return this.get(endpoint);
+    }
+
+    async getAvailableCarriers(): Promise<{ success: boolean; carriers: Carrier[] }> {
+        return this.get('/carriers/available');
+    }
+
+    async updateUserCarriers(userId: string, carrierIds: string[]): Promise<{
+        success: boolean;
+        userId: string;
+        carrierIds: string[];
+    }> {
+        return this.put(`/user/${userId}/carriers`, { carrierIds });
     }
 
     /**
