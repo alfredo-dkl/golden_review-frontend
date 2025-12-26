@@ -11,7 +11,7 @@ import {
     SortingState,
     useReactTable,
 } from '@tanstack/react-table';
-import { Search, X } from 'lucide-react';
+import { Search, X, Pencil } from 'lucide-react';
 import { apiClient, UserCarrierRow } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardTable } from '@/components/ui/card';
@@ -120,12 +120,13 @@ const UserCarriersPage = () => {
                 header: 'Actions',
                 cell: ({ row }) => (
                     <Button
-                        mode="link"
+                        mode="icon"
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEditUser(row.original)}
+                        aria-label="Edit"
                     >
-                        Edit
+                        <Pencil className="size-4 text-warning" />
                     </Button>
                 ),
                 enableSorting: false,
