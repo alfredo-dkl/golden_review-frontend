@@ -11,8 +11,8 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import Select, { MultiValue } from 'react-select';
+import { Carrier } from '@/lib/api-client';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -58,12 +58,17 @@ export function EditCarriersDialog({ user, open, onOpenChange }: EditCarriersDia
         },
     });
 
-    const handleToggleCarrier = (carrierId: string) => {
-        setSelectedCarriers(prev =>
-            prev.includes(carrierId)
-                ? prev.filter(id => id !== carrierId)
-                : [...prev, carrierId]
-        );
+
+    // Opciones para react-select
+
+    type CarrierOption = { value: string; label: string };
+    const carrierOptions: CarrierOption[] = (availableCarriers as Carrier[]).map((carrier) => ({
+        value: carrier.id,
+        label: carrier.name,
+    }));
+
+    const handleSelectChange = (selected: MultiValue<CarrierOption>) => {
+        setSelectedCarriers(selected ? selected.map((opt) => opt.value) : []);
     };
 
     const handleSave = () => {
@@ -91,39 +96,24 @@ export function EditCarriersDialog({ user, open, onOpenChange }: EditCarriersDia
 
                 <div className="py-4">
                     <Label className="text-sm font-medium mb-3 block">Available Carriers</Label>
-
                     {isLoadingCarriers ? (
                         <div className="flex items-center justify-center py-8">
                             <Loader2 className="size-6 animate-spin text-muted-foreground" />
                         </div>
                     ) : (
-                        <ScrollArea className="h-[300px] rounded-md border border-border p-4">
-                            <div className="space-y-3">
-                                {availableCarriers.length === 0 ? (
-                                    <p className="text-sm text-muted-foreground text-center py-4">
-                                        No carriers available
-                                    </p>
-                                ) : (
-                                    availableCarriers.map((carrier) => (
-                                        <div key={carrier.id} className="flex items-center space-x-3">
-                                            <Checkbox
-                                                id={`carrier-${carrier.id}`}
-                                                checked={selectedCarriers.includes(carrier.id)}
-                                                onCheckedChange={() => handleToggleCarrier(carrier.id)}
-                                            />
-                                            <label
-                                                htmlFor={`carrier-${carrier.id}`}
-                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
-                                            >
-                                                {carrier.name}
-                                            </label>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </ScrollArea>
+                        <Select
+                            isMulti
+                            options={carrierOptions}
+                            value={carrierOptions.filter(opt => selectedCarriers.includes(opt.value))}
+                            onChange={handleSelectChange}
+                            classNamePrefix="react-select"
+                            placeholder="Select carriers..."
+                            noOptionsMessage={() => 'No carriers available'}
+                            styles={{
+                                menu: (base: React.CSSProperties) => ({ ...base, zIndex: 9999 }),
+                            }}
+                        />
                     )}
-
                     <p className="text-xs text-muted-foreground mt-3">
                         {selectedCarriers.length} carrier{selectedCarriers.length !== 1 ? 's' : ''} selected
                     </p>
