@@ -126,7 +126,7 @@ const UserCarriersPage = () => {
                         onClick={() => handleEditUser(row.original)}
                         aria-label="Edit"
                     >
-                        <Pencil className="size-4 text-warning" />
+                        <Pencil className="size-4 text-orange-500" />
                     </Button>
                 ),
                 enableSorting: false,
