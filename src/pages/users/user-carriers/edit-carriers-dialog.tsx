@@ -54,14 +54,14 @@ function getCustomStyles(
     return {
         control: (base, state) => ({
             ...base,
-            backgroundColor: isDark ? '#181c32' : '#f9fafe',
+            backgroundColor: isDark ? '#181c32' : '#fff',
             borderColor: state.isFocused
-                ? '#3e97ff'
+                ? (isDark ? '#3e97ff' : '#3e97ff')
                 : isDark
                     ? '#23273b'
                     : '#e4e6ef',
             boxShadow: state.isFocused
-                ? '0 0 0 2px #3e97ff33'
+                ? (isDark ? '0 0 0 2px #3e97ff33' : '0 0 0 2px #3e97ff33')
                 : 'none',
             minHeight: 40,
             borderRadius: 8,
@@ -72,16 +72,14 @@ function getCustomStyles(
         option: (base, state) => ({
             ...base,
             backgroundColor: state.isSelected
-                ? '#3e97ff'
+                ? (isDark ? '#3e97ff' : '#e1f0ff')
                 : state.isFocused
-                    ? isDark
-                        ? '#23273b'
-                        : '#e1f0ff'
+                    ? (isDark ? '#23273b' : '#f1f3f9')
                     : isDark
                         ? '#181c32'
                         : '#fff',
             color: state.isSelected
-                ? '#fff'
+                ? (isDark ? '#fff' : '#181c32')
                 : isDark
                     ? '#fff'
                     : '#181c32',
