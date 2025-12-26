@@ -154,10 +154,16 @@ export function EditCarriersDialog({
     const availableCarriers: Carrier[] = data?.carriers ?? [];
 
     useEffect(() => {
-        if (user) {
-            setSelectedCarriers(user.carriers.map(c => c.carrierId));
+        if (user && availableCarriers.length > 0) {
+            // Solo selecciona los carriers que existen en las opciones disponibles
+            const validCarrierIds = user.carriers
+                .map(c => c.carrierId)
+                .filter(id => availableCarriers.some(carrier => carrier.id === id));
+            setSelectedCarriers(validCarrierIds);
+        } else if (!user) {
+            setSelectedCarriers([]);
         }
-    }, [user]);
+    }, [user, availableCarriers]);
 
     const updateMutation = useMutation({
         mutationFn: (carrierIds: string[]) => {
