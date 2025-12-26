@@ -27,7 +27,7 @@ function getCustomStyles(): StylesConfig<CarrierOption, true> {
     return {
         control: (base, state) => ({
             ...base,
-            backgroundColor: 'var(--bs-body-bg)',
+            backgroundColor: 'var(--bs-modal-bg)',
             borderColor: state.isFocused ? 'var(--bs-primary)' : 'var(--bs-border-color)',
             boxShadow: state.isFocused ? `0 0 0 2px var(--bs-primary)33` : 'none',
             minHeight: 40,
@@ -41,7 +41,7 @@ function getCustomStyles(): StylesConfig<CarrierOption, true> {
                 ? 'var(--bs-primary-bg-subtle)'
                 : state.isFocused
                     ? 'var(--bs-gray-100)'
-                    : 'var(--bs-body-bg)',
+                    : 'var(--bs-modal-bg)', // mismo que diálogo
             color: 'var(--bs-body-color)',
             cursor: 'pointer',
         }),
@@ -65,7 +65,7 @@ function getCustomStyles(): StylesConfig<CarrierOption, true> {
         }),
         menu: (base) => ({
             ...base,
-            backgroundColor: 'var(--bs-body-bg)',
+            backgroundColor: 'var(--bs-modal-bg)', // mismo fondo que diálogo
             borderRadius: 8,
             zIndex: 9999,
         }),
@@ -77,6 +77,10 @@ function getCustomStyles(): StylesConfig<CarrierOption, true> {
         singleValue: (base) => ({
             ...base,
             color: 'var(--bs-body-color)',
+        }),
+        menuPortal: (base) => ({
+            ...base,
+            zIndex: 9999, // asegura que el menú aparezca encima del diálogo
         }),
     };
 }
