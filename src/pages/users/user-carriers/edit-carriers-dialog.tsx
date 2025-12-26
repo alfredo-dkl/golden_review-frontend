@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+'use client';
+
+import { useEffect, useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Select, { MultiValue, StylesConfig } from 'react-select';
 import { Loader2 } from 'lucide-react';
@@ -17,112 +19,64 @@ import {
 import { Label } from '@/components/ui/label';
 
 /* -------------------------------------------------------
-   Hook: detección de modo oscuro (Tailwind + sistema)
+   React Select styles - Metronic theme
 ------------------------------------------------------- */
-function useIsDarkMode() {
-    const [isDark, setIsDark] = useState(false);
+type CarrierOption = { value: string; label: string; };
 
-    useEffect(() => {
-        const match = window.matchMedia('(prefers-color-scheme: dark)');
-
-        const update = () => {
-            setIsDark(
-                match.matches || document.documentElement.classList.contains('dark')
-            );
-        };
-
-        update();
-        match.addEventListener('change', update);
-
-        return () => match.removeEventListener('change', update);
-    }, []);
-
-    return isDark;
-}
-
-/* -------------------------------------------------------
-   React Select styles (Metronic / Tailwind look)
-------------------------------------------------------- */
-type CarrierOption = {
-    value: string;
-    label: string;
-};
-
-function getCustomStyles(
-    isDark: boolean
-): StylesConfig<CarrierOption, true> {
+function getCustomStyles(): StylesConfig<CarrierOption, true> {
     return {
         control: (base, state) => ({
             ...base,
-            backgroundColor: isDark ? '#181c32' : '#fff',
-            borderColor: state.isFocused
-                ? (isDark ? '#3e97ff' : '#3e97ff')
-                : isDark
-                    ? '#23273b'
-                    : '#e4e6ef',
-            boxShadow: state.isFocused
-                ? (isDark ? '0 0 0 2px #3e97ff33' : '0 0 0 2px #3e97ff33')
-                : 'none',
+            backgroundColor: 'var(--bs-body-bg)',
+            borderColor: state.isFocused ? 'var(--bs-primary)' : 'var(--bs-border-color)',
+            boxShadow: state.isFocused ? `0 0 0 2px var(--bs-primary)33` : 'none',
             minHeight: 40,
             borderRadius: 8,
             fontSize: 14,
-            color: isDark ? '#fff' : '#181c32',
+            color: 'var(--bs-body-color)',
         }),
-
         option: (base, state) => ({
             ...base,
             backgroundColor: state.isSelected
-                ? (isDark ? '#3e97ff' : '#e1f0ff')
+                ? 'var(--bs-primary-bg-subtle)'
                 : state.isFocused
-                    ? (isDark ? '#23273b' : '#f1f3f9')
-                    : isDark
-                        ? '#181c32'
-                        : '#fff',
-            color: state.isSelected
-                ? (isDark ? '#fff' : '#181c32')
-                : isDark
-                    ? '#fff'
-                    : '#181c32',
+                    ? 'var(--bs-gray-100)'
+                    : 'var(--bs-body-bg)',
+            color: 'var(--bs-body-color)',
             cursor: 'pointer',
         }),
-
         multiValue: (base) => ({
             ...base,
-            backgroundColor: isDark ? '#23273b' : '#e1f0ff',
+            backgroundColor: 'var(--bs-gray-200)',
             borderRadius: 6,
         }),
-
         multiValueLabel: (base) => ({
             ...base,
-            color: '#3e97ff',
+            color: 'var(--bs-primary)',
             fontWeight: 500,
         }),
-
         multiValueRemove: (base) => ({
             ...base,
-            color: '#3e97ff',
+            color: 'var(--bs-primary)',
             ':hover': {
-                backgroundColor: '#3e97ff',
-                color: '#fff',
+                backgroundColor: 'var(--bs-primary)',
+                color: 'var(--bs-white)',
             },
         }),
-
         menu: (base) => ({
             ...base,
-            backgroundColor: isDark ? '#181c32' : '#fff',
+            backgroundColor: 'var(--bs-body-bg)',
             borderRadius: 8,
             zIndex: 9999,
         }),
-
         placeholder: (base) => ({
             ...base,
-            color: '#a1a5b7',
+            color: 'var(--bs-gray-500)',
             fontSize: 14,
         }),
-
         singleValue: (base) => ({
             ...base,
-            color: isDark ? '#fff' : '#181c32',
+            color: 'var(--bs-body-color)',
         }),
     };
 }
@@ -141,35 +95,37 @@ export function EditCarriersDialog({
     open,
     onOpenChange,
 }: EditCarriersDialogProps) {
-    const isDarkMode = useIsDarkMode();
     const queryClient = useQueryClient();
     const [selectedCarriers, setSelectedCarriers] = useState<string[]>([]);
 
+    /* ---------- Fetch carriers ---------- */
     const { data, isLoading } = useQuery({
         queryKey: ['available-carriers'],
         queryFn: () => apiClient.getAvailableCarriers(),
         enabled: open,
     });
 
-    const availableCarriers: Carrier[] = data?.carriers ?? [];
+    const availableCarriers: Carrier[] = useMemo(() => {
+        return data?.carriers ?? [];
+    }, [data]);
 
+    /* ---------- SYNC USER → SELECT ---------- */
     useEffect(() => {
-        if (user && availableCarriers.length > 0) {
-            const validCarrierIds = user.carriers
-                .map(c => c.carrierId)
-                .filter(id => availableCarriers.some(carrier => carrier.id === id));
-            // Solo actualiza si hay diferencia real
-            if (
-                validCarrierIds.length !== selectedCarriers.length ||
-                !validCarrierIds.every((id, idx) => id === selectedCarriers[idx])
-            ) {
-                setSelectedCarriers(validCarrierIds);
-            }
-        } else if (!user && selectedCarriers.length > 0) {
+        if (!open) {
             setSelectedCarriers([]);
+            return;
         }
-    }, [user, availableCarriers]);
 
+        if (!user || availableCarriers.length === 0) return;
+
+        const carrierIds = user.carriers
+            .map(c => c.carrierId)
+            .filter(id => availableCarriers.some(ac => ac.id === id));
+
+        setSelectedCarriers(carrierIds);
+    }, [open, user, availableCarriers]);
+
+    /* ---------- Mutation ---------- */
     const updateMutation = useMutation({
         mutationFn: (carrierIds: string[]) => {
             if (!user) throw new Error('No user selected');
@@ -180,24 +136,18 @@ export function EditCarriersDialog({
             toast.success('Carriers updated successfully');
             onOpenChange(false);
         },
-        onError: (error) => {
-            toast.error(
-                error instanceof Error
-                    ? error.message
-                    : 'Failed to update carriers'
-            );
+        onError: () => {
+            toast.error('Failed to update carriers');
         },
     });
 
-    const carrierOptions: CarrierOption[] = availableCarriers.map(carrier => ({
-        value: carrier.id,
-        label: carrier.name,
+    const carrierOptions: CarrierOption[] = availableCarriers.map(c => ({
+        value: c.id,
+        label: c.name,
     }));
 
-    const handleSelectChange = (
-        selected: MultiValue<CarrierOption>
-    ) => {
-        setSelectedCarriers(selected.map(opt => opt.value));
+    const handleSelectChange = (selected: MultiValue<CarrierOption>) => {
+        setSelectedCarriers(selected.map(o => o.value));
     };
 
     if (!user) return null;
@@ -208,8 +158,7 @@ export function EditCarriersDialog({
                 <DialogHeader>
                     <DialogTitle>Edit Carriers</DialogTitle>
                     <DialogDescription>
-                        Select carriers for{' '}
-                        <span className="font-medium">{user.name}</span>
+                        Select carriers for <span className="font-medium">{user.name}</span>
                     </DialogDescription>
                 </DialogHeader>
 
@@ -226,13 +175,12 @@ export function EditCarriersDialog({
                         <Select
                             isMulti
                             options={carrierOptions}
-                            value={carrierOptions.filter(opt =>
-                                selectedCarriers.includes(opt.value)
+                            value={carrierOptions.filter(o =>
+                                selectedCarriers.includes(o.value)
                             )}
                             onChange={handleSelectChange}
                             placeholder="Select carriers..."
-                            noOptionsMessage={() => 'No carriers available'}
-                            styles={getCustomStyles(isDarkMode)}
+                            styles={getCustomStyles()}
                         />
                     )}
 
