@@ -155,12 +155,17 @@ export function EditCarriersDialog({
 
     useEffect(() => {
         if (user && availableCarriers.length > 0) {
-            // Solo selecciona los carriers que existen en las opciones disponibles
             const validCarrierIds = user.carriers
                 .map(c => c.carrierId)
                 .filter(id => availableCarriers.some(carrier => carrier.id === id));
-            setSelectedCarriers(validCarrierIds);
-        } else if (!user) {
+            // Solo actualiza si hay diferencia real
+            if (
+                validCarrierIds.length !== selectedCarriers.length ||
+                !validCarrierIds.every((id, idx) => id === selectedCarriers[idx])
+            ) {
+                setSelectedCarriers(validCarrierIds);
+            }
+        } else if (!user && selectedCarriers.length > 0) {
             setSelectedCarriers([]);
         }
     }, [user, availableCarriers]);
