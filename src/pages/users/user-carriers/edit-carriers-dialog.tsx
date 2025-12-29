@@ -202,12 +202,16 @@ export function EditCarriersDialog({
         // Check if a head carrier was selected
         const headCarrierSelected = newSelected.find(o => o.isHeadCarrier);
         if (headCarrierSelected && headCarrierSelected.subCarrierIds) {
+            console.log('Head carrier selected:', headCarrierSelected);
+            console.log('Subcarrier IDs under head carrier:', headCarrierSelected.subCarrierIds);
             // Add all subcarriers of the group if not already selected
             const carrierIdsToAdd = headCarrierSelected.subCarrierIds.filter(
                 id => !newSelected.some(sel => sel.value === id)
             );
+            console.log('Carrier IDs to add:', carrierIdsToAdd);
             // Find the corresponding CarrierOption objects
             const carrierOptionsToAdd = carrierOptions.filter(opt => carrierIdsToAdd.includes(opt.value));
+            console.log('Matching carrierOptions:', carrierOptionsToAdd);
             newSelected = [
                 ...newSelected,
                 ...carrierOptionsToAdd,
