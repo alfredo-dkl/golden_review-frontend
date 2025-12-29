@@ -10,8 +10,6 @@ import {
   getSortedRowModel,
   PaginationState,
   SortingState,
-
-  
   useReactTable,
 } from '@tanstack/react-table';
 import { Search, X, MoreVertical, Download } from 'lucide-react';
