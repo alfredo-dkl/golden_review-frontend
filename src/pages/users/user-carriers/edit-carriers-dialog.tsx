@@ -160,7 +160,7 @@ export function EditCarriersDialog({
     const allHeadCarriers: CarrierOption[] = (headCarriersData?.headCarriers ?? []).map(hc => ({
         value: hc.id,
         label: hc.name,
-        subCarrierIds: hc.carriersId,
+        subCarrierIds: hc.carriersId ?? [],
         isHeadCarrier: true,
     }));
 
