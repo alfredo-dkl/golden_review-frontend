@@ -29,6 +29,12 @@ export interface Carrier {
     name: string;
 }
 
+export interface HeadCarrier {
+    id: string;
+    name: string;
+    carriersId: string[];
+}
+
 export interface UserCarrierLink {
     carrierId: string;
     carrierName: string | null;
@@ -229,6 +235,10 @@ class ApiClient {
 
     async getAvailableCarriers(): Promise<{ success: boolean; carriers: Carrier[] }> {
         return this.get('/carriers/available');
+    }
+
+    async getAvailableHeadCarriers(): Promise<{ success: boolean; headCarriers: HeadCarrier[] }> {
+        return this.get('/carriers/head-carriers');
     }
 
     async updateUserCarriers(userId: string, carrierIds: string[]): Promise<{

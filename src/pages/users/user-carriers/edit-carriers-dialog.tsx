@@ -21,7 +21,12 @@ import { Label } from '@/components/ui/label';
 /* -------------------------------------------------------
    React Select styles - Metronic theme
 ------------------------------------------------------- */
-type CarrierOption = { value: string; label: string; };
+type CarrierOption = {
+    value: string;
+    label: string;
+    subCarrierIds?: string[];
+    isHeadCarrier?: boolean;
+};
 
 function getCustomStyles(): StylesConfig<CarrierOption, true> {
     return {
@@ -41,7 +46,7 @@ function getCustomStyles(): StylesConfig<CarrierOption, true> {
                 ? 'var(--bs-primary-bg-subtle)'
                 : state.isFocused
                     ? 'var(--bs-gray-100)'
-                    : 'var(--bs-modal-bg)', // mismo que diálogo
+                    : 'var(--bs-modal-bg)', // same as dialog
             color: 'var(--bs-body-color)',
             cursor: 'pointer',
         }),
@@ -65,7 +70,7 @@ function getCustomStyles(): StylesConfig<CarrierOption, true> {
         }),
         menu: (base) => ({
             ...base,
-            backgroundColor: 'var(--bs-modal-bg)', // mismo fondo que diálogo
+            backgroundColor: 'var(--bs-modal-bg)', // same background as dialog
             borderRadius: 8,
             zIndex: 9999,
         }),
@@ -80,7 +85,7 @@ function getCustomStyles(): StylesConfig<CarrierOption, true> {
         }),
         menuPortal: (base) => ({
             ...base,
-            zIndex: 9999, // asegura que el menú aparezca encima del diálogo
+            zIndex: 9999, // ensures menu appears above dialog
         }),
     };
 }
@@ -109,11 +114,17 @@ export function EditCarriersDialog({
         enabled: open,
     });
 
+    const { data: headCarriersData, isLoading: isHeadCarriersLoading } = useQuery({
+        queryKey: ['available-head-carriers'],
+        queryFn: () => apiClient.getAvailableHeadCarriers(),
+        enabled: open,
+    });
+
     const availableCarriers: Carrier[] = useMemo(() => {
         return data?.carriers ?? [];
     }, [data]);
 
-    /* ---------- SYNC USER → SELECT ---------- */
+    /* ---------- Sync user carriers to selection ---------- */
     useEffect(() => {
         if (!open) {
             setSelectedCarriers([]);
@@ -145,13 +156,71 @@ export function EditCarriersDialog({
         },
     });
 
+    // Get head carriers from backend
+    const allHeadCarriers: CarrierOption[] = (headCarriersData?.headCarriers ?? []).map(hc => ({
+        value: hc.id,
+        label: hc.name,
+        subCarrierIds: hc.carriersId,
+        isHeadCarrier: true,
+    }));
+
     const carrierOptions: CarrierOption[] = availableCarriers.map(c => ({
         value: c.id,
         label: c.name,
     }));
 
+    // Filter head carriers: only show those that do NOT have all their subcarriers selected
+    const visibleHeadCarriers = allHeadCarriers.filter(hc => {
+        if (!hc.subCarrierIds || hc.subCarrierIds.length === 0) return false;
+        // If all subcarriers are selected, do not show the head carrier
+        return !hc.subCarrierIds.every(cid => selectedCarriers.includes(cid));
+    });
+
+    // Filter carriers: if they belong to a head carrier that is fully selected, do not show
+    const hiddenCarrierIds = allHeadCarriers
+        .filter(hc => hc.subCarrierIds && hc.subCarrierIds.every(cid => selectedCarriers.includes(cid)))
+        .flatMap(hc => hc.subCarrierIds ?? []);
+
+    const visibleCarrierOptions = carrierOptions.filter(opt => !hiddenCarrierIds.includes(opt.value));
+
+    // Structure for react-select with groups
+    const groupedOptions = [
+        {
+            label: 'Head Carriers',
+            options: visibleHeadCarriers,
+        },
+        {
+            label: 'Carriers',
+            options: visibleCarrierOptions,
+        },
+    ];
+
+    // Handle selection: if a head carrier is selected, select all its subcarriers
     const handleSelectChange = (selected: MultiValue<CarrierOption>) => {
-        setSelectedCarriers(selected.map(o => o.value));
+        let newSelected = [...selected];
+
+        // Check if a head carrier was selected
+        const headCarrierSelected = newSelected.find(o => o.isHeadCarrier);
+        if (headCarrierSelected && headCarrierSelected.subCarrierIds) {
+            // Add all subcarriers of the group if not already selected
+            const carrierIdsToAdd = headCarrierSelected.subCarrierIds.filter(
+                id => !newSelected.some(sel => sel.value === id)
+            );
+            // Find the corresponding CarrierOption objects
+            const carrierOptionsToAdd = carrierOptions.filter(opt => carrierIdsToAdd.includes(opt.value));
+            newSelected = [
+                ...newSelected,
+                ...carrierOptionsToAdd,
+            ];
+            // Remove the head carrier from selection (disappears)
+            newSelected = newSelected.filter(o => !o.isHeadCarrier);
+        }
+
+        // If all subcarriers of a head carrier are manually selected, the head carrier should disappear from options
+        // (this is already handled by visibleHeadCarriers filtering)
+
+        // Only keep selected carriers (not head carriers)
+        setSelectedCarriers(newSelected.filter(o => !o.isHeadCarrier).map(o => o.value));
     };
 
     if (!user) return null;
@@ -171,17 +240,19 @@ export function EditCarriersDialog({
                         Available Carriers
                     </Label>
 
-                    {isLoading ? (
+                    {(isLoading || isHeadCarriersLoading) ? (
                         <div className="flex justify-center py-8">
                             <Loader2 className="size-6 animate-spin" />
                         </div>
                     ) : (
                         <Select
                             isMulti
-                            options={carrierOptions}
-                            value={carrierOptions.filter(o =>
-                                selectedCarriers.includes(o.value)
-                            )}
+                            closeMenuOnSelect={false}
+                            options={groupedOptions}
+                            value={[
+                                ...headCarriers.filter(hc => hc.carriersId && hc.carriersId.every(cid => selectedCarriers.includes(cid))),
+                                ...carrierOptions.filter(o => selectedCarriers.includes(o.value)),
+                            ]}
                             onChange={handleSelectChange}
                             placeholder="Select carriers..."
                             styles={getCustomStyles()}
@@ -204,7 +275,7 @@ export function EditCarriersDialog({
                     </Button>
                     <Button
                         onClick={() => updateMutation.mutate(selectedCarriers)}
-                        disabled={updateMutation.isPending || isLoading}
+                        disabled={updateMutation.isPending || isLoading || isHeadCarriersLoading}
                     >
                         {updateMutation.isPending && (
                             <Loader2 className="mr-2 size-4 animate-spin" />
