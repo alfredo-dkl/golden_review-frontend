@@ -61,10 +61,7 @@ export const MENU_SIDEBAR: MenuConfig = [
   {
     title: 'Dashboards',
     icon: LayoutGrid,
-    children: [
-      { title: 'Light Sidebar', path: '/' },
-      { title: 'Dark Sidebar', path: '/dark-sidebar' },
-    ],
+    path: '/',
   },
   { heading: 'NEW' },
   {
@@ -76,10 +73,10 @@ export const MENU_SIDEBAR: MenuConfig = [
     ],
   },
   {
-    title: 'Users',
-    icon: Users,
+    title: 'Config',
+    icon: Settings,
     children: [
-      { title: 'User Carriers', path: '/users/user-carriers' },
+      { title: 'Assign Carrier', path: '/users/user-carriers' },
     ],
   },
   { heading: 'User' },
