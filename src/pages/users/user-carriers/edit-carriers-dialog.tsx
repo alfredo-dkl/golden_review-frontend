@@ -107,124 +107,102 @@ export function EditCarriersDialog({
     const queryClient = useQueryClient();
     const [selectedCarriers, setSelectedCarriers] = useState<string[]>([]);
 
-    /* ---------- Fetch carriers ---------- */
-    const { data, isLoading } = useQuery({
+    /* ---------- Queries ---------- */
+    const { data: carriersData, isLoading } = useQuery({
         queryKey: ['available-carriers'],
         queryFn: () => apiClient.getAvailableCarriers(),
         enabled: open,
     });
 
-    const { data: headCarriersData, isLoading: isHeadCarriersLoading } = useQuery({
+    const { data: headCarriersData, isLoading: isHeadLoading } = useQuery({
         queryKey: ['available-head-carriers'],
         queryFn: () => apiClient.getAvailableHeadCarriers(),
         enabled: open,
     });
 
-    const availableCarriers: Carrier[] = useMemo(() => {
-        return data?.carriers ?? [];
-    }, [data]);
+    const availableCarriers: Carrier[] = useMemo(
+        () => carriersData?.carriers ?? [],
+        [carriersData]
+    );
 
-    /* ---------- Sync user carriers to selection ---------- */
+    /* ---------- Sync user carriers ---------- */
     useEffect(() => {
-        if (!open) {
-            setSelectedCarriers([]);
-            return;
-        }
+        if (!open || !user || !availableCarriers.length) return;
 
-        if (!user || availableCarriers.length === 0) return;
-
-        const carrierIds = user.carriers
-            .map(c => c.carrierId)
-            .filter(id => availableCarriers.some(ac => ac.id === id));
-
-        setSelectedCarriers(carrierIds);
+        setSelectedCarriers(
+            user.carriers
+                .map(c => c.carrierId)
+                .filter(id => availableCarriers.some(ac => ac.id === id))
+        );
     }, [open, user, availableCarriers]);
 
     /* ---------- Mutation ---------- */
     const updateMutation = useMutation({
-        mutationFn: (carrierIds: string[]) => {
-            if (!user) throw new Error('No user selected');
-            return apiClient.updateUserCarriers(user.userId, carrierIds);
-        },
+        mutationFn: (carrierIds: string[]) =>
+            apiClient.updateUserCarriers(user!.userId, carrierIds),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['user-carriers'] });
             toast.success('Carriers updated successfully');
             onOpenChange(false);
         },
-        onError: () => {
-            toast.error('Failed to update carriers');
-        },
+        onError: () => toast.error('Failed to update carriers'),
     });
 
-    // Get head carriers from backend
-    const allHeadCarriers: CarrierOption[] = (headCarriersData?.headCarriers ?? []).map(hc => ({
-        value: hc.id,
-        label: hc.name,
-        subCarrierIds: hc.carriersId ?? [],
-        isHeadCarrier: true,
-    }));
-
+    /* ---------- Options ---------- */
     const carrierOptions: CarrierOption[] = availableCarriers.map(c => ({
         value: c.id,
         label: c.name,
     }));
 
-    // Filter head carriers: only show those that do NOT have all their subcarriers selected
-    const visibleHeadCarriers = allHeadCarriers.filter(hc => {
-        if (!hc.subCarrierIds || hc.subCarrierIds.length === 0) return false;
-        // If all subcarriers are selected, do not show the head carrier
-        return !hc.subCarrierIds.every(cid => selectedCarriers.includes(cid));
-    });
+    const headCarrierOptions: CarrierOption[] =
+        headCarriersData?.headCarriers.map(hc => ({
+            value: hc.id,
+            label: hc.name,
+            subCarrierIds: hc.carriersId ?? [],
+            isHeadCarrier: true,
+        })) ?? [];
 
-    // Filter carriers: if they belong to a head carrier that is fully selected, do not show
-    const hiddenCarrierIds = allHeadCarriers
-        .filter(hc => hc.subCarrierIds && hc.subCarrierIds.every(cid => selectedCarriers.includes(cid)))
+    /* ---------- Visibility rules ---------- */
+    const visibleHeadCarriers = headCarrierOptions.filter(
+        hc =>
+            hc.subCarrierIds &&
+            !hc.subCarrierIds.every(id => selectedCarriers.includes(id))
+    );
+
+    const hiddenCarrierIds = headCarrierOptions
+        .filter(hc => hc.subCarrierIds?.every(id => selectedCarriers.includes(id)))
         .flatMap(hc => hc.subCarrierIds ?? []);
 
-    const visibleCarrierOptions = carrierOptions.filter(opt => !hiddenCarrierIds.includes(opt.value));
+    const visibleCarrierOptions = carrierOptions.filter(
+        c => !hiddenCarrierIds.includes(c.value)
+    );
 
-    // Structure for react-select with groups
     const groupedOptions = [
-        {
-            label: 'Head Carriers',
-            options: visibleHeadCarriers,
-        },
-        {
-            label: 'Carriers',
-            options: visibleCarrierOptions,
-        },
+        { label: 'Head Carriers', options: visibleHeadCarriers },
+        { label: 'Carriers', options: visibleCarrierOptions },
     ];
 
-    // Handle selection: if a head carrier is selected, select all its subcarriers
-    const handleSelectChange = (selected: MultiValue<CarrierOption>) => {
-        let newSelected = [...selected];
+    /* ---------- Value (REAL carriers only) ---------- */
+    const value = carrierOptions.filter(o =>
+        selectedCarriers.includes(o.value)
+    );
 
-        // Check if a head carrier was selected
-        const headCarrierSelected = newSelected.find(o => o.isHeadCarrier);
-        if (headCarrierSelected && headCarrierSelected.subCarrierIds) {
-            console.log('Head carrier selected:', headCarrierSelected);
-            console.log('Subcarrier IDs under head carrier:', headCarrierSelected.subCarrierIds);
-            // Add all subcarriers of the group if not already selected
-            const carrierIdsToAdd = headCarrierSelected.subCarrierIds.filter(
-                id => !newSelected.some(sel => sel.value === id)
+    /* ---------- Change handler ---------- */
+    const handleSelectChange = (selected: MultiValue<CarrierOption>) => {
+        const selectedIds = selected.map(o => o.value);
+
+        const added = selected.find(
+            o => !selectedCarriers.includes(o.value)
+        );
+
+        if (added?.isHeadCarrier && added.subCarrierIds) {
+            setSelectedCarriers(prev =>
+                Array.from(new Set([...prev, ...added.subCarrierIds!]))
             );
-            console.log('Carrier IDs to add:', carrierIdsToAdd);
-            // Find the corresponding CarrierOption objects
-            const carrierOptionsToAdd = carrierOptions.filter(opt => carrierIdsToAdd.includes(opt.value));
-            console.log('Matching carrierOptions:', carrierOptionsToAdd);
-            newSelected = [
-                ...newSelected,
-                ...carrierOptionsToAdd,
-            ];
-            // Remove the head carrier from selection (disappears)
-            newSelected = newSelected.filter(o => !o.isHeadCarrier);
+            return;
         }
 
-        // If all subcarriers of a head carrier are manually selected, the head carrier should disappear from options
-        // (this is already handled by visibleHeadCarriers filtering)
-
-        // Only keep selected carriers (not head carriers)
-        setSelectedCarriers(newSelected.filter(o => !o.isHeadCarrier).map(o => o.value));
+        setSelectedCarriers(selectedIds);
     };
 
     if (!user) return null;
@@ -235,37 +213,32 @@ export function EditCarriersDialog({
                 <DialogHeader>
                     <DialogTitle>Edit Carriers</DialogTitle>
                     <DialogDescription>
-                        Select carriers for <span className="font-medium">{user.name}</span>
+                        Select carriers for <strong>{user.name}</strong>
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="py-4">
-                    <Label className="mb-3 block text-sm font-medium">
-                        Available Carriers
-                    </Label>
+                    <Label className="mb-2 block">Available Carriers</Label>
 
-                    {(isLoading || isHeadCarriersLoading) ? (
+                    {(isLoading || isHeadLoading) ? (
                         <div className="flex justify-center py-8">
-                            <Loader2 className="size-6 animate-spin" />
+                            <Loader2 className="animate-spin" />
                         </div>
                     ) : (
                         <Select
                             isMulti
                             closeMenuOnSelect={false}
-                                options={groupedOptions}
-                                value={[
-                                    ...allHeadCarriers.filter(hc => hc.subCarrierIds && hc.subCarrierIds.every(cid => selectedCarriers.includes(cid))),
-                                    ...carrierOptions.filter(o => selectedCarriers.includes(o.value)),
-                                ]}
+                            options={groupedOptions}
+                            value={value}
                             onChange={handleSelectChange}
-                            placeholder="Select carriers..."
                             styles={getCustomStyles()}
+                            placeholder="Select carriers..."
                         />
                     )}
 
-                    <p className="mt-3 text-xs text-muted-foreground">
+                    <p className="mt-2 text-xs text-muted-foreground">
                         {selectedCarriers.length} carrier
-                        {selectedCarriers.length !== 1 ? 's' : ''} selected
+                        {selectedCarriers.length !== 1 && 's'} selected
                     </p>
                 </div>
 
@@ -279,10 +252,10 @@ export function EditCarriersDialog({
                     </Button>
                     <Button
                         onClick={() => updateMutation.mutate(selectedCarriers)}
-                        disabled={updateMutation.isPending || isLoading || isHeadCarriersLoading}
+                        disabled={updateMutation.isPending}
                     >
                         {updateMutation.isPending && (
-                            <Loader2 className="mr-2 size-4 animate-spin" />
+                            <Loader2 className="mr-2 animate-spin" />
                         )}
                         Save Changes
                     </Button>
