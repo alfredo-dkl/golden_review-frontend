@@ -3,14 +3,16 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-	ColumnDef,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	PaginationState,
-	SortingState,
-	useReactTable,
+  ColumnDef,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  PaginationState,
+  SortingState,
+
+  
+  useReactTable,
 } from '@tanstack/react-table';
 import { Search, X, MoreVertical, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,7 +23,7 @@ import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import Skeleton from '@/components/ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import apiClient from '@/lib/api-client';
 
 type Policy = {
