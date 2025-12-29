@@ -19,7 +19,7 @@ export function ClassicLayout() {
         <div className="m-5">
           <Link to="/">
             <img
-              src={toAbsoluteUrl('/media/app/mini-logo.svg')}
+              src={toAbsoluteUrl('/branding/gti_logo2.png')}
               className="h-[35px] max-w-none"
               alt=""
             />

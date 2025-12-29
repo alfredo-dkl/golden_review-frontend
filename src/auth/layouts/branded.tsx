@@ -28,7 +28,7 @@ export function BrandedLayout() {
           <div className="flex flex-col p-8 lg:p-16 gap-4">
             <Link to="/">
               <img
-                src={toAbsoluteUrl('/media/app/mini-logo.svg')}
+                src={toAbsoluteUrl('/branding/gti_logo2.png')}
                 className="h-[28px] max-w-none"
                 alt=""
               />
