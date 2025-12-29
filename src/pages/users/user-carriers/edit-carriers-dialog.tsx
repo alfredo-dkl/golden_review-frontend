@@ -248,11 +248,11 @@ export function EditCarriersDialog({
                         <Select
                             isMulti
                             closeMenuOnSelect={false}
-                            options={groupedOptions}
-                            value={[
-                                ...headCarriers.filter(hc => hc.carriersId && hc.carriersId.every(cid => selectedCarriers.includes(cid))),
-                                ...carrierOptions.filter(o => selectedCarriers.includes(o.value)),
-                            ]}
+                                options={groupedOptions}
+                                value={[
+                                    ...allHeadCarriers.filter(hc => hc.subCarrierIds && hc.subCarrierIds.every(cid => selectedCarriers.includes(cid))),
+                                    ...carrierOptions.filter(o => selectedCarriers.includes(o.value)),
+                                ]}
                             onChange={handleSelectChange}
                             placeholder="Select carriers..."
                             styles={getCustomStyles()}
