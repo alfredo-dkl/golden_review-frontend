@@ -215,6 +215,31 @@ class ApiClient {
         return this.request(endpoint);
     }
 
+    async getUnassigned(params?: {
+        page?: number;
+        limit?: number;
+        search?: string;
+        sortBy?: string;
+        sortOrder?: 'asc' | 'desc';
+    }): Promise<{
+        success: boolean;
+        count: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        data: Policy[];
+    }> {
+        const queryParams = new URLSearchParams();
+        if (params?.page) queryParams.append('page', params.page.toString());
+        if (params?.limit) queryParams.append('limit', params.limit.toString());
+        if (params?.search) queryParams.append('search', params.search);
+        if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+        if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+
+        const endpoint = `/policies/unassigned${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+        return this.request(endpoint);
+    }
+
     async getUserCarriers(params?: {
         page?: number;
         limit?: number;

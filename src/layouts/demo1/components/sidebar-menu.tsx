@@ -17,6 +17,33 @@ import {
 } from '@/components/ui/accordion-menu';
 import { Badge } from '@/components/ui/badge';
 
+// TODO: Replace this with your actual user roles source (e.g., from context or props)
+const USER_ROLES = ['Admin'];
+
+// Role hierarchy: Admin > Manager > User
+const ROLE_HIERARCHY = ['User', 'Manager', 'Admin'];
+
+function getHighestRole(userRoles: string[]): string | null {
+  for (let i = ROLE_HIERARCHY.length - 1; i >= 0; i--) {
+    if (userRoles.includes(ROLE_HIERARCHY[i])) {
+      return ROLE_HIERARCHY[i];
+    }
+  }
+  return null;
+}
+
+function hasAccess(itemRoles?: string[]): boolean {
+  if (!itemRoles || itemRoles.length === 0) return true;
+  const userHighest = getHighestRole(USER_ROLES);
+  if (!userHighest) return false;
+  const userLevel = ROLE_HIERARCHY.indexOf(userHighest);
+  // If any required role is at or below the user's level, grant access
+  return itemRoles.some(role => {
+    const requiredLevel = ROLE_HIERARCHY.indexOf(role);
+    return requiredLevel <= userLevel && requiredLevel !== -1;
+  });
+}
+
 export function SidebarMenu() {
   const { pathname } = useLocation();
 
@@ -43,19 +70,24 @@ export function SidebarMenu() {
   };
 
   const buildMenu = (items: MenuConfig): JSX.Element[] => {
-    return items.map((item: MenuItem, index: number) => {
-      if (item.heading) {
-        return buildMenuHeading(item, index);
-      } else if (item.disabled) {
-        return buildMenuItemRootDisabled(item, index);
-      } else {
-        return buildMenuItemRoot(item, index);
-      }
-    });
+    return items
+      .filter(item => hasAccess(item.roles))
+      .map((item: MenuItem, index: number) => {
+        if (item.heading) {
+          return buildMenuHeading(item, index);
+        } else if (item.disabled) {
+          return buildMenuItemRootDisabled(item, index);
+        } else {
+          return buildMenuItemRoot(item, index);
+        }
+      });
   };
 
   const buildMenuItemRoot = (item: MenuItem, index: number): JSX.Element => {
     if (item.children) {
+      // Filter children by access
+      const filteredChildren = item.children.filter(child => hasAccess(child.roles));
+      if (filteredChildren.length === 0) return <></>;
       return (
         <AccordionMenuSub key={index} value={item.path || `root-${index}`}>
           <AccordionMenuSubTrigger className="text-sm font-medium">
@@ -69,7 +101,7 @@ export function SidebarMenu() {
             className="ps-6"
           >
             <AccordionMenuGroup>
-              {buildMenuItemChildren(item.children, 1)}
+              {buildMenuItemChildren(filteredChildren, 1)}
             </AccordionMenuGroup>
           </AccordionMenuSubContent>
         </AccordionMenuSub>
@@ -118,13 +150,15 @@ export function SidebarMenu() {
     items: MenuConfig,
     level: number = 0,
   ): JSX.Element[] => {
-    return items.map((item: MenuItem, index: number) => {
-      if (item.disabled) {
-        return buildMenuItemChildDisabled(item, index, level);
-      } else {
-        return buildMenuItemChild(item, index, level);
-      }
-    });
+    return items
+      .filter(item => hasAccess(item.roles))
+      .map((item: MenuItem, index: number) => {
+        if (item.disabled) {
+          return buildMenuItemChildDisabled(item, index, level);
+        } else {
+          return buildMenuItemChild(item, index, level);
+        }
+      });
   };
 
   const buildMenuItemChild = (

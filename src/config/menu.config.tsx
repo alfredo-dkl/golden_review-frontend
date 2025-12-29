@@ -70,6 +70,7 @@ export const MENU_SIDEBAR: MenuConfig = [
     children: [
       { title: 'New Business', path: '/audit/new-business' },
       { title: 'Renewals', path: '/audit/renewals' },
+      { title: 'Unassigned Policies', path: '/audit/unassigned-policies', role: 'Manager' }
     ],
   },
   {
@@ -78,6 +79,7 @@ export const MENU_SIDEBAR: MenuConfig = [
     children: [
       { title: 'Assign Carrier', path: '/users/user-carriers' },
     ],
+    role: 'Admin',
   },
   { heading: 'User' },
   {
