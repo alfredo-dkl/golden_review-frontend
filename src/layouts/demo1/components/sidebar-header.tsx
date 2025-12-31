@@ -21,24 +21,24 @@ export function SidebarHeader() {
         <div className="dark:hidden">
           <img
             src={toAbsoluteUrl('/branding/gti_logo.png')}
-            className="default-logo h-[22px] max-w-none"
+            className="default-logo h-[36px] max-w-none"
             alt="Default Logo"
           />
           <img
             src={toAbsoluteUrl('/branding/gti_logo2.png')}
-            className="small-logo h-[22px] max-w-none"
+            className="small-logo h-[28px] max-w-none"
             alt="Mini Logo"
           />
         </div>
         <div className="hidden dark:block">
           <img
             src={toAbsoluteUrl('/branding/gti_logo_dark.png')}
-            className="default-logo h-[22px] max-w-none"
+            className="default-logo h-[36px] max-w-none"
             alt="Default Dark Logo"
           />
           <img
             src={toAbsoluteUrl('/branding/gti_logo.png')}
-            className="small-logo h-[22px] max-w-none"
+            className="small-logo h-[28px] max-w-none"
             alt="Mini Logo"
           />
         </div>
