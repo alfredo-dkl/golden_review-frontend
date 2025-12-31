@@ -77,7 +77,7 @@ export const MENU_SIDEBAR: MenuConfig = [
     title: 'Config',
     icon: Settings,
     children: [
-      { title: 'Assign Carrier', path: '/users/user-carriers' },
+      { title: 'Assign Carrier', path: '/users/user-carriers', icon: Users },
     ],
     role: 'Admin',
   },
