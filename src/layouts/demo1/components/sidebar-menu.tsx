@@ -17,31 +17,24 @@ import {
 } from '@/components/ui/accordion-menu';
 import { Badge } from '@/components/ui/badge';
 
-// TODO: Replace this with your actual user roles source (e.g., from context or props)
-const USER_ROLES = ['Admin'];
+// TODO: Replace this with your actual user role source (e.g., from context or props)
+const USER_ROLE = 'Admin';
 
 // Role hierarchy: Admin > Manager > User
 const ROLE_HIERARCHY = ['User', 'Manager', 'Admin'];
 
-function getHighestRole(userRoles: string[]): string | null {
-  for (let i = ROLE_HIERARCHY.length - 1; i >= 0; i--) {
-    if (userRoles.includes(ROLE_HIERARCHY[i])) {
-      return ROLE_HIERARCHY[i];
-    }
-  }
-  return null;
+function getRoleLevel(role?: string): number {
+  if (!role) return -1;
+  return ROLE_HIERARCHY.indexOf(role);
 }
 
-function hasAccess(itemRoles?: string[]): boolean {
-  if (!itemRoles || itemRoles.length === 0) return true;
-  const userHighest = getHighestRole(USER_ROLES);
-  if (!userHighest) return false;
-  const userLevel = ROLE_HIERARCHY.indexOf(userHighest);
-  // If any required role is at or below the user's level, grant access
-  return itemRoles.some(role => {
-    const requiredLevel = ROLE_HIERARCHY.indexOf(role);
-    return requiredLevel <= userLevel && requiredLevel !== -1;
-  });
+function hasAccess(itemRole?: string): boolean {
+  // If no role is required, allow access
+  if (!itemRole) return true;
+  const userLevel = getRoleLevel(USER_ROLE);
+  const requiredLevel = getRoleLevel(itemRole);
+  // Grant access if user's level is equal or higher in hierarchy
+  return userLevel >= requiredLevel && requiredLevel !== -1;
 }
 
 export function SidebarMenu() {
@@ -71,7 +64,7 @@ export function SidebarMenu() {
 
   const buildMenu = (items: MenuConfig): JSX.Element[] => {
     return items
-      .filter(item => hasAccess(item.roles))
+      .filter(item => hasAccess(item.role))
       .map((item: MenuItem, index: number) => {
         if (item.heading) {
           return buildMenuHeading(item, index);
@@ -86,7 +79,7 @@ export function SidebarMenu() {
   const buildMenuItemRoot = (item: MenuItem, index: number): JSX.Element => {
     if (item.children) {
       // Filter children by access
-      const filteredChildren = item.children.filter(child => hasAccess(child.roles));
+      const filteredChildren = item.children.filter(child => hasAccess(child.role));
       if (filteredChildren.length === 0) return <></>;
       return (
         <AccordionMenuSub key={index} value={item.path || `root-${index}`}>
@@ -151,7 +144,7 @@ export function SidebarMenu() {
     level: number = 0,
   ): JSX.Element[] => {
     return items
-      .filter(item => hasAccess(item.roles))
+      .filter(item => hasAccess(item.role))
       .map((item: MenuItem, index: number) => {
         if (item.disabled) {
           return buildMenuItemChildDisabled(item, index, level);
@@ -172,7 +165,8 @@ export function SidebarMenu() {
           key={index}
           value={item.path || `child-${level}-${index}`}
         >
-          <AccordionMenuSubTrigger className="text-[13px]">
+          <AccordionMenuSubTrigger className="text-[13px] flex items-center gap-2">
+            {item.icon && <item.icon data-slot="accordion-menu-icon" />}
             {item.collapse ? (
               <span className="text-muted-foreground">
                 <span className="hidden [[data-state=open]>span>&]:inline">
@@ -183,7 +177,7 @@ export function SidebarMenu() {
                 </span>
               </span>
             ) : (
-              item.title
+              <span data-slot="accordion-menu-title">{item.title}</span>
             )}
           </AccordionMenuSubTrigger>
           <AccordionMenuSubContent
@@ -212,7 +206,10 @@ export function SidebarMenu() {
           value={item.path || ''}
           className="text-[13px]"
         >
-          <Link to={item.path || '#'}>{item.title}</Link>
+          <Link to={item.path || '#'} className="flex items-center gap-2">
+            {item.icon && <item.icon data-slot="accordion-menu-icon" />}
+            <span data-slot="accordion-menu-title">{item.title}</span>
+          </Link>
         </AccordionMenuItem>
       );
     }
