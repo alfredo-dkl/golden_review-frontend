@@ -173,7 +173,7 @@ export const MicrosoftAuthAdapter = {
             });
 
             // Extract roles from ID token claims
-            const roles = response.idTokenClaims?.roles || tokenResponse.idTokenClaims?.roles || [];
+            const roles = (response.idTokenClaims as { roles?: string[] })?.roles || (tokenResponse.idTokenClaims as { roles?: string[] })?.roles || [];
 
             // Get user profile from Microsoft Graph
             const graphUser = await this.getUserFromGraph(tokenResponse.accessToken);
