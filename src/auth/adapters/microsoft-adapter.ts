@@ -307,8 +307,6 @@ export const MicrosoftAuthAdapter = {
         photoUrl?: string | null;
     }): UserModel {
         const fullname = backendUser.name || '';
-        // Convert string roles to numbers for compatibility, or keep as empty if you want to change UserModel
-        const roleNumbers = (backendUser.roles || []).map((_, index) => index);
         return {
             id: backendUser.id,
             email: backendUser.email,
@@ -320,10 +318,10 @@ export const MicrosoftAuthAdapter = {
             company_name: 'Golden Trust',
             occupation: backendUser.position,
             phone: '',
-            roles: roleNumbers,
+            roles: backendUser.roles || [],
             pic: backendUser.photoUrl || '',
             language: 'en' as const,
-            is_admin: false, // Will be set based on backend logic
+            is_admin: backendUser.roles?.includes('Admin') || false,
             isMicrosoftLogin: true,
         };
     },

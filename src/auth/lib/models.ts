@@ -24,7 +24,7 @@ export interface UserModel {
   occupation?: string;
   company_name?: string; // Using snake_case consistently
   phone?: string;
-  roles?: number[]; // Array of role IDs
+  roles?: string[]; // Array of roles: 'Admin', 'Manager', 'User'
   pic?: string;
   language?: LanguageCode; // Maintain existing type
   is_admin?: boolean; // Added admin flag

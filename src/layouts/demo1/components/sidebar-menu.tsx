@@ -5,6 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { MENU_SIDEBAR } from '@/config/menu.config';
 import { MenuConfig, MenuItem } from '@/config/types';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/auth/context/auth-context';
 import {
   AccordionMenu,
   AccordionMenuClassNames,
@@ -17,9 +18,6 @@ import {
 } from '@/components/ui/accordion-menu';
 import { Badge } from '@/components/ui/badge';
 
-// TODO: Replace this with your actual user role source (e.g., from context or props)
-const USER_ROLE = 'Admin';
-
 // Role hierarchy: Admin > Manager > User
 const ROLE_HIERARCHY = ['User', 'Manager', 'Admin'];
 
@@ -28,17 +26,32 @@ function getRoleLevel(role?: string): number {
   return ROLE_HIERARCHY.indexOf(role);
 }
 
-function hasAccess(itemRole?: string): boolean {
-  // If no role is required, allow access
+function getUserHighestRole(userRoles?: string[]): string | undefined {
+  if (!userRoles || userRoles.length === 0) return undefined;
+  let highestLevel = -1;
+  let highestRole: string | undefined;
+  for (const role of userRoles) {
+    const level = getRoleLevel(role);
+    if (level > highestLevel) {
+      highestLevel = level;
+      highestRole = role;
+    }
+  }
+  return highestRole;
+}
+
+function hasAccess(itemRole?: string, userRoles?: string[]): boolean {
   if (!itemRole) return true;
-  const userLevel = getRoleLevel(USER_ROLE);
+  const userRole = getUserHighestRole(userRoles);
+  const userLevel = getRoleLevel(userRole);
   const requiredLevel = getRoleLevel(itemRole);
-  // Grant access if user's level is equal or higher in hierarchy
   return userLevel >= requiredLevel && requiredLevel !== -1;
 }
 
 export function SidebarMenu() {
   const { pathname } = useLocation();
+  const { user } = useAuth();
+  const userRoles = user?.roles;
 
   // Memoize matchPath to prevent unnecessary re-renders
   const matchPath = useCallback(
@@ -64,7 +77,7 @@ export function SidebarMenu() {
 
   const buildMenu = (items: MenuConfig): JSX.Element[] => {
     return items
-      .filter(item => hasAccess(item.role))
+      .filter(item => hasAccess(item.role, userRoles))
       .map((item: MenuItem, index: number) => {
         if (item.heading) {
           return buildMenuHeading(item, index);
@@ -79,7 +92,7 @@ export function SidebarMenu() {
   const buildMenuItemRoot = (item: MenuItem, index: number): JSX.Element => {
     if (item.children) {
       // Filter children by access
-      const filteredChildren = item.children.filter(child => hasAccess(child.role));
+      const filteredChildren = item.children.filter(child => hasAccess(child.role, userRoles));
       if (filteredChildren.length === 0) return <></>;
       return (
         <AccordionMenuSub key={index} value={item.path || `root-${index}`}>
@@ -144,7 +157,7 @@ export function SidebarMenu() {
     level: number = 0,
   ): JSX.Element[] => {
     return items
-      .filter(item => hasAccess(item.role))
+      .filter(item => hasAccess(item.role, userRoles))
       .map((item: MenuItem, index: number) => {
         if (item.disabled) {
           return buildMenuItemChildDisabled(item, index, level);
