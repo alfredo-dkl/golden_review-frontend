@@ -120,10 +120,33 @@ export function EditCarriersDialog({
         enabled: open,
     });
 
-    const availableCarriers: Carrier[] = useMemo(
-        () => carriersData?.carriers ?? [],
-        [carriersData]
-    );
+    // Get all users to filter out carriers already assigned to others
+    const allUsersData = queryClient.getQueryData<{
+        success: boolean;
+        count: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        data: UserCarrierRow[];
+    }>(['user-carriers']);
+
+    // Filter carriers: exclude those assigned to OTHER users
+    const availableCarriers: Carrier[] = useMemo(() => {
+        if (!carriersData?.carriers || !allUsersData?.data) {
+            return carriersData?.carriers ?? [];
+        }
+
+        // Get all carrier IDs assigned to OTHER users (not current user)
+        const assignedToOthers = new Set<string>();
+        allUsersData.data.forEach((u: UserCarrierRow) => {
+            if (u.userId !== user?.userId) {
+                u.carriers.forEach(c => assignedToOthers.add(c.carrierId));
+            }
+        });
+
+        // Filter out carriers assigned to others
+        return carriersData.carriers.filter(c => !assignedToOthers.has(c.id));
+    }, [carriersData, allUsersData, user?.userId]);
 
     /* ---------- Sync user carriers ---------- */
     useEffect(() => {
