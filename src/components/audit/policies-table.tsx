@@ -425,7 +425,7 @@ export const PoliciesTable = ({
                 cellBorder: true,
             }}
         >
-            <Card className="min-w-full h-[75vh] flex flex-col overflow-hidden">
+            <Card className="w-full h-[75vh] flex flex-col overflow-hidden">
                 <CardHeader className="py-5 flex-wrap gap-2">
                     <div className="flex items-center justify-between w-full gap-4">
                         <div className="flex items-center gap-4 flex-1">
@@ -503,7 +503,7 @@ export const PoliciesTable = ({
                     </div>
                 </CardHeader>
 
-                <div className="flex-1 overflow-auto">
+                <div className="flex-1 overflow-x-auto overflow-y-auto">
                     <DataGridTable />
                 </div>
 
