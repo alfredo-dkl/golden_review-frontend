@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     ColumnDef,
     getCoreRowModel,
@@ -94,6 +94,7 @@ export const PoliciesTable = ({
     downloadFilename,
 }: PoliciesTableProps) => {
     const { user: currentUser } = useAuth();
+    const queryClient = useQueryClient();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [pagination, setPagination] = useState<PaginationState>({
@@ -161,6 +162,9 @@ export const PoliciesTable = ({
                     apiClient.assignPolicy(policy.policy_id, selectedUser.userId)
                 )
             );
+
+            // Invalidate and refetch the policies query
+            await queryClient.invalidateQueries({ queryKey });
 
             // Clear selection and close dialog
             setRowSelection({});
