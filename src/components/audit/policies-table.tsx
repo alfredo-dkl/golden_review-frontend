@@ -231,15 +231,18 @@ export const PoliciesTable = ({
                 id: 'checkbox',
                 header: ({ table }) => (
                     <Checkbox
-                        checked={table.getIsAllRowsSelected()}
-                        onChange={table.getToggleAllRowsSelectedHandler()}
+                        checked={
+                            table.getIsAllPageRowsSelected() ||
+                            (table.getIsSomePageRowsSelected() && 'indeterminate')
+                        }
+                        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                         aria-label="Select all rows"
                     />
                 ),
                 cell: ({ row }) => (
                     <Checkbox
                         checked={row.getIsSelected()}
-                        onChange={row.getToggleSelectedHandler()}
+                        onCheckedChange={(value) => row.toggleSelected(!!value)}
                         aria-label="Select row"
                     />
                 ),
