@@ -426,6 +426,7 @@ export const MENU_SIDEBAR_COMPACT: MenuConfig = [
   },
 ];
 
+// Top Menu
 export const MENU_MEGA: MenuConfig = [
   { title: 'Home', path: '/' },
   {
