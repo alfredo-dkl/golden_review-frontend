@@ -354,7 +354,7 @@ export const PoliciesTable = ({
                 enableSorting: true,
                 size: 150,
             },
-            ...(hasAccess('User', currentUser?.roles) ? [] : [
+            ...(hasAccess('Manager', currentUser?.roles) ? [
                 {
                     id: 'assigned_user_name',
                     accessorKey: 'assigned_user_name',
@@ -369,7 +369,7 @@ export const PoliciesTable = ({
                     enableSorting: true,
                     size: 150,
                 } as ColumnDef<Policy>,
-            ]),
+            ] : []),
         ],
         [currentUser?.roles]
     );
