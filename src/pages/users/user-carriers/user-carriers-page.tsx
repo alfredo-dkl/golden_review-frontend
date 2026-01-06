@@ -22,6 +22,8 @@ import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+import { toAbsoluteUrl } from '@/lib/helpers';
 import { EditCarriersDialog } from './edit-carriers-dialog';
 
 const UserCarriersPage = () => {
@@ -62,6 +64,20 @@ const UserCarriersPage = () => {
         return carriers.map(c => c.carrierName || c.carrierId).join(', ');
     }, []);
 
+    const getAvatarSrc = useCallback((photoPath?: string | null) => {
+        if (!photoPath) return null;
+        if (photoPath.startsWith('http')) return photoPath;
+        return toAbsoluteUrl(photoPath);
+    }, []);
+
+    const getInitials = useCallback((name: string) => {
+        if (!name) return 'U';
+        const parts = name.trim().split(/\s+/).filter(Boolean);
+        if (parts.length === 0) return 'U';
+        if (parts.length === 1) return parts[0][0]?.toUpperCase() || 'U';
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }, []);
+
     const columns = useMemo<ColumnDef<UserCarrierRow>[]>(
         () => [
             {
@@ -70,12 +86,34 @@ const UserCarriersPage = () => {
                 header: ({ column }) => (
                     <DataGridColumnHeader title="User" column={column} />
                 ),
-                cell: ({ row }) => (
-                    <div className="flex flex-col">
-                        <span className="font-medium">{row.original.name}</span>
-                        <span className="text-xs text-muted-foreground">{row.original.email}</span>
-                    </div>
-                ),
+                cell: ({ row }) => {
+                    const avatarSrc = getAvatarSrc(row.original.photoPath);
+                    const initials = getInitials(row.original.name);
+
+                    return (
+                        <div className="flex items-center gap-3">
+                            {avatarSrc ? (
+                                <img
+                                    className="size-9 rounded-full object-cover shrink-0"
+                                    src={avatarSrc}
+                                    alt="User avatar"
+                                />
+                            ) : (
+                                <span
+                                    className={cn(
+                                        'size-9 rounded-full shrink-0 flex items-center justify-center text-sm font-semibold bg-primary text-primary-foreground',
+                                    )}
+                                >
+                                    {initials}
+                                </span>
+                            )}
+                            <div className="flex flex-col">
+                                <span className="font-medium">{row.original.name}</span>
+                                <span className="text-xs text-muted-foreground">{row.original.email}</span>
+                            </div>
+                        </div>
+                    );
+                },
                 enableSorting: true,
                 size: 220,
             },
@@ -135,7 +173,7 @@ const UserCarriersPage = () => {
                 size: 100,
             },
         ],
-        [formatCarriers]
+        [formatCarriers, getAvatarSrc, getInitials]
     );
 
     const table = useReactTable({

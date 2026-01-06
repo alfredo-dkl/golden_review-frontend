@@ -10,6 +10,8 @@ import {
     PaginationState,
     SortingState,
     useReactTable,
+    HeaderContext,
+    CellContext,
 } from '@tanstack/react-table';
 import { Download, Search, X } from 'lucide-react';
 import { Policy, apiClient, UserCarrierRow } from '@/lib/api-client';
@@ -352,22 +354,24 @@ export const PoliciesTable = ({
                 enableSorting: true,
                 size: 150,
             },
-            {
-                id: 'assigned_user_name',
-                accessorKey: 'assigned_user_name',
-                header: ({ column }) => (
-                    <DataGridColumnHeader title="Assigned To" column={column} />
-                ),
-                cell: ({ row }) => (
-                    <span className="text-secondary-foreground">
-                        {row.original.assigned_user_name || '-'}
-                    </span>
-                ),
-                enableSorting: true,
-                size: 150,
-            },
+            ...(hasAccess('User', currentUser?.roles) ? [] : [
+                {
+                    id: 'assigned_user_name',
+                    accessorKey: 'assigned_user_name',
+                    header: ({ column }: HeaderContext<Policy, unknown>) => (
+                        <DataGridColumnHeader title="Underwritter" column={column} />
+                    ),
+                    cell: ({ row }: CellContext<Policy, unknown>) => (
+                        <span className="text-secondary-foreground">
+                            {row.original.assigned_user_name || '-'}
+                        </span>
+                    ),
+                    enableSorting: true,
+                    size: 150,
+                } as ColumnDef<Policy>,
+            ]),
         ],
-        []
+        [currentUser?.roles]
     );
 
     const table = useReactTable({
@@ -444,18 +448,18 @@ export const PoliciesTable = ({
                         </div>
 
                         <div className="flex items-center gap-2">
-                            {hasAccess('Manager', currentUser?.roles) && (
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={Object.keys(rowSelection).length === 0}
-                                        >
-                                            Actions
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={Object.keys(rowSelection).length === 0}
+                                    >
+                                        Actions
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    {hasAccess('Manager', currentUser?.roles) && (
                                         <DropdownMenuItem
                                             onClick={() => {
                                                 const selectedPolicies = Object.keys(rowSelection)
@@ -467,9 +471,9 @@ export const PoliciesTable = ({
                                         >
                                             Assign to
                                         </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            )}
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
 
                             <Button
                                 onClick={handleDownloadCSV}

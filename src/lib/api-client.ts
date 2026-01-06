@@ -51,6 +51,7 @@ export interface UserCarrierRow {
     department?: string | null;
     position?: string | null;
     carriers: UserCarrierLink[];
+    photoPath?: string | null;
 }
 
 export interface UserCarriersResponse {
