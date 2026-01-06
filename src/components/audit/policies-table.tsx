@@ -363,6 +363,7 @@ export const PoliciesTable = ({
         getSortedRowModel: getSortedRowModel(),
         manualSorting: true,
         manualPagination: true,
+        enableRowSelection: true,
         enableColumnPinning: true,
     });
 
@@ -448,32 +449,30 @@ export const PoliciesTable = ({
                                 <Download className="size-4" />
                                 Download
                             </Button>
-                        </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 w-full">
-                        <div className="relative flex-1 max-w-xs">
-                            <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-                            <Input
-                                placeholder={`Search ${pluralLabel}...`}
-                                value={searchQuery}
-                                onChange={(e) => {
-                                    setSearchQuery(e.target.value);
-                                    setPagination({ pageIndex: 0, pageSize: 25 });
-                                }}
-                                className="pl-9 h-9"
-                            />
-                            {searchQuery && (
-                                <button
-                                    onClick={() => {
-                                        setSearchQuery('');
+                            <div className="relative flex-1 max-w-xs">
+                                <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                                <Input
+                                    placeholder={`Search ${pluralLabel}...`}
+                                    value={searchQuery}
+                                    onChange={(e) => {
+                                        setSearchQuery(e.target.value);
                                         setPagination({ pageIndex: 0, pageSize: 25 });
                                     }}
-                                    className="absolute right-3 top-2.5"
-                                >
-                                    <X className="size-4 text-muted-foreground hover:text-foreground" />
-                                </button>
-                            )}
+                                    className="pl-9 h-9"
+                                />
+                                {searchQuery && (
+                                    <button
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setPagination({ pageIndex: 0, pageSize: 25 });
+                                        }}
+                                        className="absolute right-3 top-2.5"
+                                    >
+                                        <X className="size-4 text-muted-foreground hover:text-foreground" />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </CardHeader>
