@@ -4,7 +4,7 @@ import { JSX, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MENU_SIDEBAR } from '@/config/menu.config';
 import { MenuConfig, MenuItem } from '@/config/types';
-import { cn } from '@/lib/utils';
+import { cn, hasAccess } from '@/lib/utils';
 import { useAuth } from '@/auth/context/auth-context';
 import {
   AccordionMenu,
@@ -17,36 +17,6 @@ import {
   AccordionMenuSubTrigger,
 } from '@/components/ui/accordion-menu';
 import { Badge } from '@/components/ui/badge';
-
-// Role hierarchy: Admin > Manager > User
-const ROLE_HIERARCHY = ['User', 'Manager', 'Admin'];
-
-function getRoleLevel(role?: string): number {
-  if (!role) return -1;
-  return ROLE_HIERARCHY.indexOf(role);
-}
-
-function getUserHighestRole(userRoles?: string[]): string | undefined {
-  if (!userRoles || userRoles.length === 0) return undefined;
-  let highestLevel = -1;
-  let highestRole: string | undefined;
-  for (const role of userRoles) {
-    const level = getRoleLevel(role);
-    if (level > highestLevel) {
-      highestLevel = level;
-      highestRole = role;
-    }
-  }
-  return highestRole;
-}
-
-function hasAccess(itemRole?: string, userRoles?: string[]): boolean {
-  if (!itemRole) return true;
-  const userRole = getUserHighestRole(userRoles);
-  const userLevel = getRoleLevel(userRole);
-  const requiredLevel = getRoleLevel(itemRole);
-  return userLevel >= requiredLevel && requiredLevel !== -1;
-}
 
 export function SidebarMenu() {
   const { pathname } = useLocation();

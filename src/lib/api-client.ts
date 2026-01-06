@@ -23,6 +23,9 @@ export interface Policy {
     carrier: string;
     premium: number | null;
     csr: string;
+    assigned_user_name?: string | null;
+    assigned_user_id?: string | null;
+    assigned_user_email?: string | null;
 }
 
 export interface Carrier {

@@ -13,6 +13,8 @@ import {
 } from '@tanstack/react-table';
 import { Download, Search, X } from 'lucide-react';
 import { Policy, apiClient, UserCarrierRow } from '@/lib/api-client';
+import { hasAccess } from '@/lib/utils';
+import { useAuth } from '@/auth/context/auth-context';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardHeader } from '@/components/ui/card';
@@ -91,6 +93,8 @@ export const PoliciesTable = ({
     pluralLabel,
     downloadFilename,
 }: PoliciesTableProps) => {
+    const { user: currentUser } = useAuth();
+
     const [searchQuery, setSearchQuery] = useState('');
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
@@ -190,6 +194,7 @@ export const PoliciesTable = ({
                 'Expiration Date',
                 'Premium',
                 'CSR',
+                'Assigned To',
             ];
             const csvContent = [
                 headers.join(','),
@@ -202,6 +207,7 @@ export const PoliciesTable = ({
                         formatDate(policy.exp_date),
                         policy.premium !== null ? policy.premium : '',
                         `"${policy.csr || ''}"`,
+                        `"${policy.assigned_user_name || ''}"`,
                     ].join(',')
                 ),
             ].join('\n');
@@ -341,6 +347,20 @@ export const PoliciesTable = ({
                 enableSorting: true,
                 size: 150,
             },
+            {
+                id: 'assigned_user_name',
+                accessorKey: 'assigned_user_name',
+                header: ({ column }) => (
+                    <DataGridColumnHeader title="Assigned To" column={column} />
+                ),
+                cell: ({ row }) => (
+                    <span className="text-secondary-foreground">
+                        {row.original.assigned_user_name || '-'}
+                    </span>
+                ),
+                enableSorting: true,
+                size: 150,
+            },
         ],
         []
     );
@@ -418,30 +438,32 @@ export const PoliciesTable = ({
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={Object.keys(rowSelection).length === 0}
-                                    >
-                                        Actions
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            const selectedPolicies = Object.keys(rowSelection)
-                                                .map((key) => filteredPolicies.find((p) => p.policy_number === key))
-                                                .filter((p) => p !== undefined) as Policy[];
-                                            setPoliciesForAssignment(selectedPolicies);
-                                            setAssignDialogOpen(true);
-                                        }}
-                                    >
-                                        Assign to
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            {hasAccess('Manager', currentUser?.roles) && (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={Object.keys(rowSelection).length === 0}
+                                        >
+                                            Actions
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem
+                                            onClick={() => {
+                                                const selectedPolicies = Object.keys(rowSelection)
+                                                    .map((key) => filteredPolicies.find((p) => p.policy_number === key))
+                                                    .filter((p) => p !== undefined) as Policy[];
+                                                setPoliciesForAssignment(selectedPolicies);
+                                                setAssignDialogOpen(true);
+                                            }}
+                                        >
+                                            Assign to
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            )}
 
                             <Button
                                 onClick={handleDownloadCSV}
@@ -507,11 +529,11 @@ export const PoliciesTable = ({
 
             {/* Assignment Dialog */}
             <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
-                <DialogContent className="max-w-2xl max-h-96">
+                <DialogContent className="max-w-2xl max-h-screen flex flex-col">
                     <DialogHeader>
                         <DialogTitle>Assign {policiesForAssignment.length} {policiesForAssignment.length === 1 ? singularLabel : pluralLabel} to User</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4">
+                    <div className="space-y-4 overflow-y-auto flex-1">
                         <div className="bg-muted p-3 rounded text-sm">
                             <p className="font-semibold mb-2">Policies to assign:</p>
                             <div className="space-y-1 max-h-32 overflow-y-auto">
@@ -549,24 +571,24 @@ export const PoliciesTable = ({
                                 )}
                             </div>
                         </div>
+                    </div>
 
-                        <div className="flex justify-end gap-2 pt-4">
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    setAssignDialogOpen(false);
-                                    setSelectedUser(null);
-                                }}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={handleConfirmAssignment}
-                                disabled={!selectedUser || isAssigning}
-                            >
-                                {isAssigning ? 'Assigning...' : 'Confirm Assignment'}
-                            </Button>
-                        </div>
+                    <div className="flex justify-end gap-2 pt-4 border-t">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setAssignDialogOpen(false);
+                                setSelectedUser(null);
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleConfirmAssignment}
+                            disabled={!selectedUser || isAssigning}
+                        >
+                            {isAssigning ? 'Assigning...' : 'Confirm Assignment'}
+                        </Button>
                     </div>
                 </DialogContent>
             </Dialog>
