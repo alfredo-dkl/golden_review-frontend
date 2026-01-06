@@ -503,7 +503,7 @@ export const PoliciesTable = ({
                     </div>
                 </CardHeader>
 
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-auto">
                     <DataGridTable />
                 </div>
 
