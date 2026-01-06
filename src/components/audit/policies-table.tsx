@@ -152,7 +152,7 @@ export const PoliciesTable = ({
 
     // Confirm assignment and send to backend
     const handleConfirmAssignment = async () => {
-        if (!selectedUser || policiesForAssignment.length === 0) return;
+        if (selectedUser === null || policiesForAssignment.length === 0) return;
 
         setIsAssigning(true);
         try {
@@ -555,6 +555,20 @@ export const PoliciesTable = ({
                         <div>
                             <label className="text-sm font-medium mb-2 block">Select User:</label>
                             <div className="border rounded-lg max-h-64 overflow-y-auto">
+                                {/* Unassign option */}
+                                <button
+                                    onClick={() => setSelectedUser({ userId: null, name: 'Unassign', email: 'Remove user assignment', carriers: [] } as unknown as UserCarrierRow)}
+                                    className={`w-full text-left p-3 border-b hover:bg-accent transition-colors ${selectedUser?.userId === null
+                                        ? 'bg-primary text-primary-foreground'
+                                        : ''
+                                        }`}
+                                >
+                                    <div className="font-medium text-destructive">Unassign</div>
+                                    <div className="text-sm text-muted-foreground">
+                                        Remove user assignment from selected policies
+                                    </div>
+                                </button>
+
                                 {usersData && usersData.length > 0 ? (
                                     usersData.map((user) => (
                                         <button
