@@ -108,7 +108,7 @@ export const PoliciesTable = ({
     const [policiesForAssignment, setPoliciesForAssignment] = useState<Policy[]>([]);
     const [isAssigning, setIsAssigning] = useState(false);
 
-    // Fetch available users for assignment
+    // Fetch available users for assignment (only if user has Manager role)
     const { data: usersData } = useQuery({
         queryKey: ['available-users-for-assignment'],
         queryFn: async () => {
@@ -119,6 +119,7 @@ export const PoliciesTable = ({
             });
             return response.data || [];
         },
+        enabled: hasAccess('Manager', currentUser?.roles),
     });
 
     // Fetch policies from backend with server-side pagination and sorting
