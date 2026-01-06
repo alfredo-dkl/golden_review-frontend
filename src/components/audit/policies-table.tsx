@@ -418,13 +418,14 @@ export const PoliciesTable = ({
             recordCount={filteredPolicies?.length || 0}
             isLoading={isLoading}
             tableLayout={{
+                headerSticky: true,
                 columnsPinnable: true,
                 columnsMovable: true,
                 columnsVisibility: false,
                 cellBorder: true,
             }}
         >
-            <Card className="min-w-full">
+            <Card className="min-w-full h-[75vh] flex flex-col overflow-hidden">
                 <CardHeader className="py-5 flex-wrap gap-2">
                     <div className="flex items-center justify-between w-full gap-4">
                         <div className="flex items-center gap-4 flex-1">
@@ -502,7 +503,9 @@ export const PoliciesTable = ({
                     </div>
                 </CardHeader>
 
-                <DataGridTable />
+                <div className="flex-1 overflow-y-auto">
+                    <DataGridTable />
+                </div>
 
                 {isLoading && (
                     <div className="space-y-2 p-4">
