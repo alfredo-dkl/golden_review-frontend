@@ -7,8 +7,8 @@ const NewBusinessPage = () => {
   return (
     <PoliciesTable
       queryKey={['new-business']}
-      fetchFn={apiClient.getNewBusiness}
-      downloadFn={apiClient.getNewBusiness}
+      fetchFn={(params) => apiClient.getNewBusiness(params)}
+      downloadFn={(params) => apiClient.getNewBusiness(params)}
       title="New Business"
       singularLabel="policy"
       pluralLabel="policies"

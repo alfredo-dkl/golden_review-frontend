@@ -7,8 +7,8 @@ const UnassignedPoliciesPage = () => {
 	return (
 		<PoliciesTable
 			queryKey={['unassigned']}
-			fetchFn={apiClient.getUnassigned}
-			downloadFn={apiClient.getUnassigned}
+			fetchFn={(params) => apiClient.getUnassigned(params)}
+			downloadFn={(params) => apiClient.getUnassigned(params)}
 			title="Unassigned Policies"
 			singularLabel="policy"
 			pluralLabel="policies"

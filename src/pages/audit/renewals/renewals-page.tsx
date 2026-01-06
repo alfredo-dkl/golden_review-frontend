@@ -7,8 +7,8 @@ const RenewalsPage = () => {
     return (
         <PoliciesTable
             queryKey={['renewals']}
-            fetchFn={apiClient.getRenewals}
-            downloadFn={apiClient.getRenewals}
+            fetchFn={(params) => apiClient.getRenewals(params)}
+            downloadFn={(params) => apiClient.getRenewals(params)}
             title="Renewals"
             singularLabel="renewal"
             pluralLabel="renewals"
