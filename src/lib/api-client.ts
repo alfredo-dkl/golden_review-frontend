@@ -15,6 +15,7 @@ interface BackendUser {
 }
 
 export interface Policy {
+    policy_id: string;
     policy_number: string;
     insured_name: string;
     effective_date: Date;
@@ -272,6 +273,13 @@ class ApiClient {
         carrierIds: string[];
     }> {
         return this.put(`/user/${userId}/carriers`, { carrierIds });
+    }
+
+    async assignPolicy(policyId: string, userId: string): Promise<{
+        success: boolean;
+        message: string;
+    }> {
+        return this.put(`/policies/${policyId}/assign`, { userId });
     }
 
     /**
