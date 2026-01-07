@@ -263,8 +263,9 @@ class ApiClient {
         return this.get(endpoint);
     }
 
-    async getAvailableCarriers(): Promise<{ success: boolean; carriers: Carrier[] }> {
-        return this.get('/carriers/available');
+    async getAvailableCarriers(userId?: string): Promise<{ success: boolean; carriers: Carrier[] }> {
+        const endpoint = userId ? `/carriers/available?userId=${encodeURIComponent(userId)}` : '/carriers/available';
+        return this.get(endpoint);
     }
 
     async getAvailableHeadCarriers(): Promise<{ success: boolean; headCarriers: HeadCarrier[] }> {
