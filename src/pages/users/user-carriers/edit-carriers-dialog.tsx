@@ -115,9 +115,9 @@ export function EditCarriersDialog({
     });
 
     const { data: headCarriersData, isLoading: isHeadLoading } = useQuery({
-        queryKey: ['available-head-carriers'],
-        queryFn: () => apiClient.getAvailableHeadCarriers(),
-        enabled: open,
+        queryKey: ['available-head-carriers', user?.userId],
+        queryFn: () => apiClient.getAvailableHeadCarriers(user?.userId),
+        enabled: open && !!user?.userId,
     });
 
     const availableCarriers: Carrier[] = useMemo(

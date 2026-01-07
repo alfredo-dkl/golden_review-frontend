@@ -268,8 +268,9 @@ class ApiClient {
         return this.get(endpoint);
     }
 
-    async getAvailableHeadCarriers(): Promise<{ success: boolean; headCarriers: HeadCarrier[] }> {
-        return this.get('/carriers/head-carriers');
+    async getAvailableHeadCarriers(userId?: string): Promise<{ success: boolean; headCarriers: HeadCarrier[] }> {
+        const endpoint = userId ? `/carriers/head-carriers?userId=${encodeURIComponent(userId)}` : '/carriers/head-carriers';
+        return this.get(endpoint);
     }
 
     async updateUserCarriers(userId: string, carrierIds: string[]): Promise<{
