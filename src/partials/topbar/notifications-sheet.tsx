@@ -55,12 +55,12 @@ export function NotificationsSheet({ trigger }: { trigger: ReactNode }) {
             <Tabs defaultValue="all" className="w-full relative">
               <TabsList variant="line" className="w-full px-5 mb-5">
                 <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="goldenAudit">GoldenAudit</TabsTrigger>
                 <TabsTrigger value="inbox" className="relative">
                   Inbox
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 absolute top-1 -end-1" />
                 </TabsTrigger>
-                <TabsTrigger value="team">Team</TabsTrigger>
-                <TabsTrigger value="following">Following</TabsTrigger>
+                <TabsTrigger value="team">Chat</TabsTrigger>
                 <div className="grow flex items-center justify-end">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -198,8 +198,8 @@ export function NotificationsSheet({ trigger }: { trigger: ReactNode }) {
                 </div>
               </TabsContent>
 
-              {/* Team Tab */}
-              <TabsContent value="team" className="mt-0">
+              {/* GoldenAudit Tab */}
+              <TabsContent value="goldenAudit" className="mt-0">
                 <div className="flex flex-col gap-5">
                   <Item10 />
                   <div className="border-b border-b-border"></div>
@@ -240,8 +240,8 @@ export function NotificationsSheet({ trigger }: { trigger: ReactNode }) {
                 </div>
               </TabsContent>
 
-              {/* Following Tab */}
-              <TabsContent value="following" className="mt-0">
+              {/* Chat Tab */}
+              <TabsContent value="chat" className="mt-0">
                 <div className="flex flex-col gap-5">
                   <Item18 />
                   <div className="border-b border-b-border"></div>

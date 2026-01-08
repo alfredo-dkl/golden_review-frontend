@@ -197,8 +197,8 @@ export const PoliciesTable = ({
                 'Policy Number',
                 'Insured Name',
                 'Carrier',
+                'Binder Date',
                 'Effective Date',
-                'Expiration Date',
                 'Premium',
                 'CSR',
                 'Assigned To',
@@ -210,8 +210,8 @@ export const PoliciesTable = ({
                         `"${policy.policy_number || ''}"`,
                         `"${policy.insured_name || ''}"`,
                         `"${policy.carrier || ''}"`,
+                        formatDate(policy.binder_date),
                         formatDate(policy.effective_date),
-                        formatDate(policy.exp_date),
                         policy.premium !== null ? policy.premium : '',
                         `"${policy.csr || ''}"`,
                         `"${policy.assigned_user_name || ''}"`,
@@ -301,6 +301,20 @@ export const PoliciesTable = ({
                 size: 180,
             },
             {
+                id: 'binder_date',
+                accessorKey: 'binder_date',
+                header: ({ column }) => (
+                    <DataGridColumnHeader title="Binder Date" column={column} />
+                ),
+                cell: ({ row }) => (
+                    <span className="text-secondary-foreground">
+                        {formatDate(row.original.binder_date)}
+                    </span>
+                ),
+                enableSorting: true,
+                size: 140,
+            },
+            {
                 id: 'effective_date',
                 accessorKey: 'effective_date',
                 header: ({ column }) => (
@@ -309,20 +323,6 @@ export const PoliciesTable = ({
                 cell: ({ row }) => (
                     <span className="text-secondary-foreground">
                         {formatDate(row.original.effective_date)}
-                    </span>
-                ),
-                enableSorting: true,
-                size: 140,
-            },
-            {
-                id: 'exp_date',
-                accessorKey: 'exp_date',
-                header: ({ column }) => (
-                    <DataGridColumnHeader title="Expiration Date" column={column} />
-                ),
-                cell: ({ row }) => (
-                    <span className="text-secondary-foreground">
-                        {formatDate(row.original.exp_date)}
                     </span>
                 ),
                 enableSorting: true,

@@ -50,6 +50,16 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
       : user?.username || 'User');
 
   const displayEmail = user?.email || '';
+  const roleAbbrevMap: Record<string, string> = {
+    Admin: 'ADM',
+    Manager: 'MGR',
+    User: 'USR',
+  };
+
+  const displayRole = (() => {
+    const role = user?.roles?.[0] || 'User';
+    return roleAbbrevMap[role] || 'USR';
+  })();
 
   const handleLanguage = (lang: Language) => {
     changeLanguage(lang);
@@ -83,7 +93,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             </div>
           </div>
           <Badge variant="primary" appearance="light" size="sm">
-            Pro
+            {displayRole}
           </Badge>
         </div>
 

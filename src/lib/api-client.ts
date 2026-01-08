@@ -18,6 +18,7 @@ export interface Policy {
     policy_id: string;
     policy_number: string;
     insured_name: string;
+    binder_date: Date;
     effective_date: Date;
     exp_date: Date;
     carrier: string;
