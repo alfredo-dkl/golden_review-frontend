@@ -78,12 +78,17 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
           <div className="flex items-center gap-2">
             <UserAvatar className="border-2 border-green-500" />
             <div className="flex flex-col">
-              <Link
-                to="/account/home/get-started"
-                className="text-sm text-mono hover:text-primary font-semibold"
-              >
-                {displayName}
-              </Link>
+              <div className="flex items-center gap-1">
+                <Link
+                  to="/account/home/get-started"
+                  className="text-sm text-mono hover:text-primary font-semibold"
+                >
+                  {displayName}
+                </Link>
+                <Badge variant="primary" appearance="light" size="sm">
+                  {displayRole}
+                </Badge>
+              </div>
               <a
                 href={`mailto:${displayEmail}`}
                 className="text-xs text-muted-foreground hover:text-primary"
@@ -92,9 +97,6 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
               </a>
             </div>
           </div>
-          <Badge variant="primary" appearance="light" size="sm">
-            {displayRole}
-          </Badge>
         </div>
 
         <DropdownMenuSeparator />
