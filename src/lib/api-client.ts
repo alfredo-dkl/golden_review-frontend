@@ -289,6 +289,13 @@ class ApiClient {
         return this.put(`/policies/${policyId}/assign`, { userId });
     }
 
+    async parsePolicy(policyId: string): Promise<{
+        success: boolean;
+        message: string;
+    }> {
+        return this.post(`/parse/policy/${policyId}`);
+    }
+
     /**
      * Generic API methods for other endpoints
      */
